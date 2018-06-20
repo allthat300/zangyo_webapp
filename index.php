@@ -23,12 +23,12 @@ $pdo = db_connect();
 
 <body>
   <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">  <!--トップナビゲーションバー-->
-    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="index.html">残業管理</a>  <!--ページ最上部へ移動-->
+    <a class="navbar-brand col-sm-1 col-md-1 mr-0" href="index.html">残業管理</a>  <!--ページ最上部へ移動-->
   </nav>
 
   <div class="container-fluid"> <!-- コンテナ：フルサイズ -->
     <div class="row">　<!-- 行 -->
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar"> <!-- 列。サイドバーに該当。md(768px)以下では非表示。背景は白。 -->
+      <nav class="col-md-1 d-none d-md-block bg-light sidebar"> <!-- 列。サイドバーに該当。md(768px)以下では非表示。背景は白。 -->
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item">
@@ -98,7 +98,8 @@ $pdo = db_connect();
       </div>
     </nav>
 
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <main role="main" class="col-md-11 ml-sm-auto col-lg-11 px-4">
+
 
 
       <div>
@@ -157,6 +158,7 @@ $pdo = db_connect();
                 <th>種別</th>
                 <th>名前</th>
                 <th>申請時間</th>
+                <th>実施時間</th>
                 <th>機種</th>
                 <th>内容</th>
                 <th>備考</th>
@@ -166,7 +168,7 @@ $pdo = db_connect();
               <tr>
                 <?php
                 try{
-                  $sql="SELECT zangyo.zangyo_date,zangyo.app_time,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks
+                  $sql="SELECT zangyo.zangyo_date,zangyo.app_time,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks,zangyo.result_time
                         from ((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
                                       LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
                                       ORDER BY id DESC
@@ -181,10 +183,17 @@ $pdo = db_connect();
                 if($count>0){
                   while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                     ?>
-                    <td><?=htmlspecialchars($row['zangyo_date'],ENT_QUOTES)?></td>
+                    <td><?=htmlspecialchars($row['zangyo_date'],ENT_QUOTES)?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
                     <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td>
                     <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td>
                     <td><?=htmlspecialchars($row['app_time'],ENT_QUOTES)?></td>
+                    <td><?php
+                    if($row['result_time'] == "00:00:00"){
+                      echo "";
+                    }else {
+                      echo htmlspecialchars($row['result_time'],ENT_QUOTES);
+                    }
+                    ?></td>
                     <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td>
                     <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td>
                     <td><?=htmlspecialchars($row['remarks'],ENT_QUOTES)?></td>
