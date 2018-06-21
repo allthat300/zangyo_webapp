@@ -32,7 +32,7 @@ $pdo = db_connect();
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item">
-              <a class="nav-link active" href="index.php">
+              <a class="nav-link" href="index.php">
                 <span data-feather="upload"></span>
                 申請 <span class="sr-only">(current)</span>
               </a>
@@ -50,7 +50,7 @@ $pdo = db_connect();
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="add-employee.php">
+              <a class="nav-link active" href="add-employee.php">
                 <span data-feather="users"></span>
                 社員追加
               </a>
@@ -100,83 +100,93 @@ $pdo = db_connect();
 
     <main role="main" class="col-md-11 ml-sm-auto col-lg-11 px-4">
 
+      <h1 class="h1 my-3">社員追加</h1>
 
-
-      <div>
-        <h1 class="h1 my-3">残業申請</h1>
-
-        <div class="table-responsive">
-
-          <table class="table table-striped table-bordered table-condensed">
-            <thead>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-condensed">
+          <thead>
+            <tr>
+              <th style="width: 150px" class="text-center">社員番号</th>
+              <th style="width: 100px" class="text-center">名前</th>
+              <th style="width: 100px" class="text-center">部署</th>
+              <th style="width: 100px" class="text-center">グループ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <form name="form1" method="post" action="">
               <tr>
-                <th style="width: 150px" class="text-center">実施日</th>
-                <th style="width: 100px" class="text-center">種別</th>
-                <th style="width: 100px" class="text-center">社員番号</th>
-                <th class="text-center">申請時間</th>
-                <th class="text-center">機種</th>
-                <th class="text-center">内容</th>
-                <th class="text-center">備考</th>
+                <td class="m-0 p-0"><input type="text" class="form-control" placeholder="社員番号" name="employee_id"></td>
+                <td class="m-0 p-0"><input type="text" class="form-control" placeholder="社員名" name="employee_name"></td>
+                <td class="m-0 p-0">
+                  <select class="form-control" name="department_id">
+                    <?php
+                    try{
+                      $sql="SELECT * from department";
+                      $stmh=$pdo->prepare($sql);
+                      $stmh->execute();
+                      $count=$stmh->rowCount();
+                    }catch(PDOException $Exception){
+                      print"エラー：".$Exception->getMessage();
+                    }
+                    if($count>0){
+                      while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+                        ?>
+                        <option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></option>
+                        <?php
+                      }
+                    }
+                    ?>
+                  </select>
+                </td>
+                <td class="m-0 p-0">
+                  <select class="form-control" name="group_id">
+                    <?php
+                    try{
+                      $sql="SELECT * from work_group";
+                      $stmh=$pdo->prepare($sql);
+                      $stmh->execute();
+                      $count=$stmh->rowCount();
+                    }catch(PDOException $Exception){
+                      print"エラー：".$Exception->getMessage();
+                    }
+                    if($count>0){
+                      while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+                        ?>
+                        <option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></option>
+                        <?php
+                      }
+                    }
+                    ?>
+                  </select>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <form name="form1" method="post" action="index.php">
-                <tr>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="ex)2018-06-06" name="zangyo_date"></td>
-                  <td class="m-0 p-0">
-                    <select class="form-control" name="zangyo_category">
-                      <option value="1">残業</option>
-                      <option value="2">早出</option>
-                      <option value="3">休出</option>
-                      <option value="4">代休</option>
-                    </select>
-                  </td>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="社員番号" name="employee_id"></td>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="ex)1時間→1:00" name="zangyo_time"></td>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="EX-****" name="model_name"></td>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="内容" name="zangyo_detail"></td>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="備考" name="zangyo_remarks"></td>
-                </tr>
 
-              </tbody>
-            </table>
-
-          </div>
-          <button class="btn btn-primary btn-lg btn-block" type="submit" name='application' value='send'>送信</button>
+            </tbody>
+          </table>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" name='add-employee' value='send'>登録</button>
         </form>
       </div>
       <hr>
-      <?php require("../php_libs/INSERT.php"); ?>
+      <?php require("../php_libs/EMPLOYEE_INSERT.php"); ?>
       <hr>
-
-
-      <h4>最新情報</h4>
+      <h4>メンバー一覧</h4>
       <table class="table table-striped table-bordered table-condensed">
         <thead>
           <tr>
-            <th>実施日</th>
-            <th>種別</th>
+            <th>社員番号</th>
             <th>名前</th>
             <th>部署</th>
-          　<th>グループ</th>
-            <th>申請時間</th>
-            <th>実施時間</th>
-            <th>月間累計</th>
-            <th>年間累計</th>
-            <th>確認</th>
-            <th>機種</th>
-            <th>内容</th>
-            <th>備考</th>
+            <th>グループ</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <?php
             try{
-              $sql="SELECT zangyo.zangyo_date,zangyo.app_time,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks,zangyo.result_time
-              from ((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
-              LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
-              ORDER BY id DESC
+              $sql="SELECT employee.employee_id,employee.employee_name,department.department_name,work_group.group_name
+              from ((employee LEFT OUTER JOIN department ON employee.department_id = department.department_id)
+              LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+              ORDER BY employee_id
               ";
               //                        where id=(select max(id) from zangyo)";
               $stmh=$pdo->prepare($sql);
@@ -188,31 +198,10 @@ $pdo = db_connect();
             if($count>0){
               while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                 ?>
-                <td><?php
-
-                $datetime = new DateTime($row['zangyo_date']);
-                $week = array("日", "月", "火", "水", "木", "金", "土");
-                $w = (int)$datetime->format('w');
-                echo htmlspecialchars($row['zangyo_date'],ENT_QUOTES) . " (" . $week[$w] . ")";
-                  ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
-                <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td>
+                <td><?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?></td>
                 <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td>
-                <td></td>
-                <td></td>
-                <td><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td>
-                <td><?php
-                if($row['result_time'] == "00:00:00"){
-                  echo "";
-                }else {
-                  echo htmlspecialchars($row['result_time'],ENT_QUOTES);
-                }
-                ?></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td>
-                <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td>
-                <td><?=htmlspecialchars($row['remarks'],ENT_QUOTES)?></td>
+                <td><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td>
+                <td><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td>
               </tr>
               <?php
             }
@@ -222,8 +211,8 @@ $pdo = db_connect();
       </table>
 
     </main>
-    </div>
   </div>
+</div>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
