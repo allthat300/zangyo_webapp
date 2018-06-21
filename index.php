@@ -52,7 +52,7 @@ $pdo = db_connect();
             <li class="nav-item">
               <a class="nav-link" href="#">
                 <span data-feather="users"></span>
-                メンバー追加
+                社員追加
               </a>
             </li>
             <li class="nav-item">
@@ -150,63 +150,78 @@ $pdo = db_connect();
       <hr>
 
 
-          <h4>最新情報</h4>
-          <table class="table table-striped table-bordered table-condensed">
-            <thead>
-              <tr>
-                <th>実施日</th>
-                <th>種別</th>
-                <th>名前</th>
-                <th>申請時間</th>
-                <th>実施時間</th>
-                <th>機種</th>
-                <th>内容</th>
-                <th>備考</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <?php
-                try{
-                  $sql="SELECT zangyo.zangyo_date,zangyo.app_time,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks,zangyo.result_time
-                        from ((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
-                                      LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
-                                      ORDER BY id DESC
-                                      ";
-//                        where id=(select max(id) from zangyo)";
-                  $stmh=$pdo->prepare($sql);
-                  $stmh->execute();
-                  $count=$stmh->rowCount();
-                }catch(PDOException $Exception){
-                  print"エラー：".$Exception->getMessage();
-                }
-                if($count>0){
-                  while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
-                    ?>
-                    <td><?=htmlspecialchars($row['zangyo_date'],ENT_QUOTES)?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
-                    <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td>
-                    <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td>
-                    <td><?=htmlspecialchars($row['app_time'],ENT_QUOTES)?></td>
-                    <td><?php
-                    if($row['result_time'] == "00:00:00"){
-                      echo "";
-                    }else {
-                      echo htmlspecialchars($row['result_time'],ENT_QUOTES);
-                    }
-                    ?></td>
-                    <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td>
-                    <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td>
-                    <td><?=htmlspecialchars($row['remarks'],ENT_QUOTES)?></td>
-                  </tr>
-                  <?php
-                }
-                ?>
-              </tbody>
-            </table>
+      <h4>最新情報</h4>
+      <table class="table table-striped table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th>実施日</th>
+            <th>種別</th>
+            <th>名前</th>
+            <th>部署</th>
+          　<th>グループ</th>
+            <th>申請時間</th>
+            <th>実施時間</th>
+            <th>月間累計</th>
+            <th>年間累計</th>
+            <th>確認</th>
+            <th>機種</th>
+            <th>内容</th>
+            <th>備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
             <?php
+            try{
+              $sql="SELECT zangyo.zangyo_date,zangyo.app_time,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks,zangyo.result_time
+              from ((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
+              LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
+              ORDER BY id DESC
+              ";
+              //                        where id=(select max(id) from zangyo)";
+              $stmh=$pdo->prepare($sql);
+              $stmh->execute();
+              $count=$stmh->rowCount();
+            }catch(PDOException $Exception){
+              print"エラー：".$Exception->getMessage();
+            }
+            if($count>0){
+              while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+                ?>
+                <td><?php
+
+                $datetime = new DateTime($row['zangyo_date']);
+                $week = array("日", "月", "火", "水", "木", "金", "土");
+                $w = (int)$datetime->format('w');
+                echo htmlspecialchars($row['zangyo_date'],ENT_QUOTES) . " (" . $week[$w] . ")"; 
+                  ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
+                <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td>
+                <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td>
+                <td></td>
+                <td></td>
+                <td><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td>
+                <td><?php
+                if($row['result_time'] == "00:00:00"){
+                  echo "";
+                }else {
+                  echo htmlspecialchars($row['result_time'],ENT_QUOTES);
+                }
+                ?></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td>
+                <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td>
+                <td><?=htmlspecialchars($row['remarks'],ENT_QUOTES)?></td>
+              </tr>
+              <?php
+            }
           }
           ?>
-        </main>
+        </tbody>
+      </table>
+
+    </main>
     </div>
   </div>
 
