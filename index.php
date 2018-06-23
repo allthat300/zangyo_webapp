@@ -173,9 +173,11 @@ $pdo = db_connect();
           <tr>
             <?php
             try{
-              $sql="SELECT zangyo.zangyo_date,zangyo.app_time,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks,zangyo.result_time
-              from ((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
+              $sql="SELECT zangyo.zangyo_date,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.remarks,zangyo.result_time,department.department_name,work_group.group_name
+              from ((((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
               LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
+              LEFT OUTER JOIN department ON employee.department_id = department.department_id)
+              LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
               ORDER BY id DESC
               ";
               //                        where id=(select max(id) from zangyo)";
@@ -188,31 +190,55 @@ $pdo = db_connect();
             if($count>0){
               while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                 ?>
-                <td><?php
+                <td><!--実施日--><?php
 
                 $datetime = new DateTime($row['zangyo_date']);
                 $week = array("日", "月", "火", "水", "木", "金", "土");
                 $w = (int)$datetime->format('w');
-                echo htmlspecialchars($row['zangyo_date'],ENT_QUOTES) . " (" . $week[$w] . ")";
+                echo htmlspecialchars(substr($row['zangyo_date'],0,10),ENT_QUOTES) . " (" . $week[$w] . ")";
                   ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
-                <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td>
-                <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td>
-                <td></td>
-                <td></td>
-                <td><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td>
-                <td><?php
+                <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td><!--種別-->
+                <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td><!--名前-->
+                <td><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td></td><!--部署-->
+                <td><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td></td><!--グループ-->
+                <td><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td><!--申請時間-->
+                <td><!--実施時間-->
+                  <?php
                 if($row['result_time'] == "00:00:00"){
                   echo "";
                 }else {
                   echo htmlspecialchars($row['result_time'],ENT_QUOTES);
                 }
                 ?></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td>
-                <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td>
-                <td><?=htmlspecialchars($row['remarks'],ENT_QUOTES)?></td>
+                <td><!--月間累計-->
+                  <?php
+                  try{
+                    $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(app_time))) AS sum_month_time from zangyo
+                    where zangyo_date BETWEEN '".substr($row['zangyo_date'],0,8)."01 00:00:00' AND '" . $row['zangyo_date'] . "' "
+                    . "AND employee_id = '" . $row['employee_id'] . "' "
+                    ."ORDER BY zangyo_date,case_id desc"; //""内の''や""はよくわからないので.で連結
+                    $stmh_sum_month=$pdo->prepare($sql_sum_month);
+                    $stmh_sum_month->execute();
+                    $count_sum_month=$stmh_sum_month->rowCount();
+                  }catch(PDOException $Exception_sum_month){
+                    print"エラー：".$Exception_sum_month->getMessage();
+                  }
+                  //echo $sql_sum_month;
+                  if($count_sum_month=0){
+                    echo "0";
+                  }else{
+                    while($row_sum_month=$stmh_sum_month->fetch(PDO::FETCH_ASSOC)){
+                      echo htmlspecialchars(substr($row_sum_month['sum_month_time'],0,5),ENT_QUOTES);
+                    }
+                  }
+
+                   ?>
+                </td>
+                <td></td><!--年間累計-->
+                <td></td><!--確認-->
+                <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td><!--機種-->
+                <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td><!--内容-->
+                <td><?=mb_strimwidth(htmlspecialchars($row['remarks'],ENT_QUOTES),0,30,"...")?></td><!--備考-->
               </tr>
               <?php
             }

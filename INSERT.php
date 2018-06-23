@@ -9,7 +9,13 @@ try{
 
   if(isset($_POST['zangyo_date']) || isset($_POST['zangyo_category'])){
 
-    $stmh->bindValue(':zangyo_date',$_POST['zangyo_date'],PDO::PARAM_STR); //prepareメソッドの:dateに外部からのdata_formを結びつける。データ型は文字列。
+    if($_POST['zangyo_category'] == 1){
+      $zangyo_adjust = " 18:00:00";
+    }else{
+      $zangyo_adjust = " 00:00:00";
+    };
+
+    $stmh->bindValue(':zangyo_date',substr($_POST['zangyo_date'],0,10).$zangyo_adjust,PDO::PARAM_STR); //prepareメソッドの:dateに外部からのdata_formを結びつける。データ型は文字列。
     $stmh->bindValue(':case_id',$_POST['zangyo_category'],PDO::PARAM_INT);
     $stmh->bindValue(':employee_id',$_POST['employee_id'],PDO::PARAM_INT);
     $stmh->bindValue(':app_time',$_POST['zangyo_time'],PDO::PARAM_STR);
