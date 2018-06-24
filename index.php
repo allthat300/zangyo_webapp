@@ -199,8 +199,8 @@ $pdo = db_connect();
                   ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
                 <td><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td><!--種別-->
                 <td><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td><!--名前-->
-                <td><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td></td><!--部署-->
-                <td><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td></td><!--グループ-->
+                <td><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td><!--部署-->
+                <td><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td><!--グループ-->
                 <td><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td><!--申請時間-->
                 <td><!--実施時間-->
                   <?php
@@ -210,31 +210,13 @@ $pdo = db_connect();
                   echo htmlspecialchars($row['result_time'],ENT_QUOTES);
                 }
                 ?></td>
-                <td><!--月間累計-->
+                <td><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
+                <td><!--年間累計-->
                   <?php
-                  try{
-                    $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(app_time))) AS sum_month_time from zangyo
-                    where zangyo_date BETWEEN '".substr($row['zangyo_date'],0,8)."01 00:00:00' AND '" . $row['zangyo_date'] . "' "
-                    . "AND employee_id = '" . $row['employee_id'] . "' "
-                    ."ORDER BY zangyo_date,case_id desc"; //""内の''や""はよくわからないので.で連結
-                    $stmh_sum_month=$pdo->prepare($sql_sum_month);
-                    $stmh_sum_month->execute();
-                    $count_sum_month=$stmh_sum_month->rowCount();
-                  }catch(PDOException $Exception_sum_month){
-                    print"エラー：".$Exception_sum_month->getMessage();
-                  }
-                  //echo $sql_sum_month;
-                  if($count_sum_month=0){
-                    echo "0";
-                  }else{
-                    while($row_sum_month=$stmh_sum_month->fetch(PDO::FETCH_ASSOC)){
-                      echo htmlspecialchars(substr($row_sum_month['sum_month_time'],0,5),ENT_QUOTES);
-                    }
-                  }
-
-                   ?>
-                </td>
-                <td></td><!--年間累計-->
+                require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                require("../php_libs/SUM_YEAR.php");
+                ?>
+              </td>
                 <td></td><!--確認-->
                 <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td><!--機種-->
                 <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td><!--内容-->
