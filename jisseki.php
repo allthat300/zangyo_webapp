@@ -101,11 +101,12 @@ $pdo = db_connect();
     <main role="main" class="col-md-11 ml-sm-auto col-lg-11 px-4">
 
       <h1 class="h1 my-3">実績入力</h1>
-      <form>
-        <button class="btn btn-primary btn-lg btn-block" type="submit" name='jisseki' value='send'>送信</button>
+      <form name="form2" method="post" action="jisseki.php">
+        <button class="btn btn-primary btn-lg btn-block" type="submit">送信</button>
+        <hr>
+        <?php require("../php_libs/UPDATE_JISSEKI.php"); ?>
+        <hr>
         <table class="table table-striped table-bordered table-condensed">
-          <hr>
-          <hr>
           <thead>
             <tr>
               <th>実施日</th>
@@ -155,10 +156,8 @@ $pdo = db_connect();
 
                   <!--実施時間-->
                   <?php
-                  if($row['result_time'] == "00:00:00"){
-                    echo '<td class="m-0 p-0">
-                    <input type="text" class="form-control" placeholder="実施時間" name="test">
-                    </td>';
+                  if(Is_null($row['result_time']) == TRUE){
+                    echo '<td class="m-0 p-0"><input type="text" class="form-control" placeholder="実施時間" name="R'.$row['id'].'"></td>';
                   }else {
                     echo '<td class="m-0 p-2">';
                     echo htmlspecialchars($row['result_time'],ENT_QUOTES);
@@ -180,10 +179,9 @@ $pdo = db_connect();
           </tbody>
         </table>
       </form>
-
     </main>
-    </div>
   </div>
+</div>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->

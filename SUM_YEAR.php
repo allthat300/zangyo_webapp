@@ -1,6 +1,6 @@
 <?php
 try{
-  $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(result_time))) AS sum_year_time from zangyo
+  $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(IFNULL(result_time,'00:00:00')))) AS sum_year_time from zangyo
   where zangyo_date BETWEEN '" . change_to_Apr1($row['zangyo_date']) . "' AND '" . $row['zangyo_date'] . "' "
   . "AND employee_id = '" . $row['employee_id'] . "' "
   ."ORDER BY zangyo_date,case_id desc"; //""内の''や""はよくわからないので.で連結

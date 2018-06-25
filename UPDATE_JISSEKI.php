@@ -1,17 +1,24 @@
 <?php
 
-try{
-  $pdo->beginTransaction(); //トランザクション開始
-  $sql = "UPDATE zangyo SET result_time = :result_time WHERE id = :id";
-  $stmh = $pdo->prepare($sql);  //prepareメソッドで各テーブル名(date,case_id...)に対しパラメータ(:date,:case_id...)を与える。
+  foreach($_POST as $id => $result_time)
+  {
+    $count_jisseki = 0;
+    if($result_time <> "")
+    {
+      try{
+        $pdo->beginTransaction(); //トランザクション開始
+        $sql = "UPDATE zangyo SET result_time = :result_time WHERE id = :id";
+        $stmh = $pdo->prepare($sql);  //prepareメソッドで各テーブル名(date,case_id...)に対しパラメータ(:date,:case_id...)を与える。
 
-    $stmh->bindValue(':id',$_POST['id'],PDO::PARAM_INT);
-    $stmh->bindValue(':result_time',$_POST['result_time'],PDO::PARAM_STR);
-    $stmh->execute(); //プリペアドステートメントの実行
-    $pdo->commit(); //トランザクションをコミット
-    print "データを登録しました。<br>";  //rowcount:SQL文を実行して検索結果や更新・削除された行数を返すメソッド
+        $stmh->bindValue(':id',substr($id,1),PDO::PARAM_INT);
+        $stmh->bindValue(':result_time',$result_time,PDO::PARAM_STR);
+        $stmh->execute(); //プリペアドステートメントの実行
+        $pdo->commit(); //トランザクションをコミット
+        //print substr($id,1)."のデータを登録しました。<br>";  //rowcount:SQL文を実行して検索結果や更新・削除された行数を返すメソッド
+        $count_jisseki ++;
+      }catch (PDOException $Exception){
+        $pdo->rollBack(); //トランザクションをロールバック
+        print "エラー：".$Exception->getMessage();
+      }
+    }
   }
-}catch (PDOException $Exception){
-  $pdo->rollBack(); //トランザクションをロールバック
-  print "エラー：".$Exception->getMessage();
-}

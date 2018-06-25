@@ -127,8 +127,9 @@ $pdo = db_connect();
                     <select class="form-control" name="zangyo_category">
                       <option value="1">残業</option>
                       <option value="2">早出</option>
-                      <option value="3">休出</option>
-                      <option value="4">代休</option>
+                      <option value="3">FLEX</option>
+                      <option value="4">休出</option>
+                      <option value="5">代休</option>
                     </select>
                   </td>
                   <td class="m-0 p-0"><input type="text" class="form-control" placeholder="社員番号" name="employee_id"></td>
@@ -146,7 +147,8 @@ $pdo = db_connect();
         </form>
       </div>
       <hr>
-      <?php require("../php_libs/INSERT.php"); ?>
+      <?php require("../php_libs/INSERT.php");?>
+
       <hr>
 
 
@@ -204,7 +206,7 @@ $pdo = db_connect();
                 <td><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td><!--申請時間-->
                 <td><!--実施時間-->
                   <?php
-                if($row['result_time'] == "00:00:00"){
+                if(Is_null($row['result_time']) == TRUE){
                   echo "";
                 }else {
                   echo htmlspecialchars($row['result_time'],ENT_QUOTES);

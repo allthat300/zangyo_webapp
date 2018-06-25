@@ -1,6 +1,5 @@
 
 <?php
-
 try{
   $pdo->beginTransaction(); //トランザクション開始
   $sql = "INSERT INTO zangyo (zangyo_date,case_id,employee_id,app_time,project,project_detail,remarks)
