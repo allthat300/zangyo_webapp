@@ -19,6 +19,11 @@ $pdo = db_connect();
 
   <!-- Custom styles for this template -->
   <link href="/dist/css/dashboard.css" rel="stylesheet">
+
+  <!-- for bootstrap-datepicker -->
+  <!-- <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" type="text/css" href="/dist/css/bootstrap-datepicker.min.css">
+
 </head>
 
 <body>
@@ -231,6 +236,18 @@ $pdo = db_connect();
         </tbody>
       </table>
 
+      <div class="form-group" id="datepicker-default">
+        <label class="col-sm-3 control-label">Default</label>
+        <div class="col-sm-9 form-inline">
+          <div class="input-group date">
+            <input type="text" class="form-control" value="20170621">
+            <div class="input-group-addon">
+              <i class="fa fa-calendar"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
     </div>
   </div>
@@ -238,7 +255,7 @@ $pdo = db_connect();
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript" language="javascript"></script>
 <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
 <script src="/dist/js/vendor/popper.min.js"></script>
 <script src="/dist/js/bootstrap.min.js"></script>
@@ -249,6 +266,21 @@ $pdo = db_connect();
 feather.replace()
 </script>
 
+<!-- Datepicker -->
+<script type="text/javascript" src="/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript" src="/dist/js/bootstrap-datepicker.ja.js"></script>
+
+<script>
+$(function(){
+    //Default
+    $('#datepicker-default .date').datepicker({
+        format: "yyyy-mm-dd",
+        language: 'ja',
+        autoclose: true
+    });
+
+});
+</script>
 
 </body>
 </html>
