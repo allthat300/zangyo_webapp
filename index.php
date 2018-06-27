@@ -28,7 +28,7 @@ $pdo = db_connect();
 
 <body>
   <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">  <!--トップナビゲーションバー-->
-    <a class="navbar-brand col-sm-1 col-md-1 mr-0" href="index.html">残業管理</a>  <!--ページ最上部へ移動-->
+    <a class="navbar-brand col-sm-1 col-md-1 mr-0" href="index.php">残業管理</a>  <!--ページ最上部へ移動-->
   </nav>
 
   <div class="container-fluid"> <!-- コンテナ：フルサイズ -->
@@ -127,7 +127,19 @@ $pdo = db_connect();
             <tbody>
               <form name="form1" method="post" action="index.php">
                 <tr>
-                  <td class="m-0 p-0"><input type="text" class="form-control" placeholder="ex)2018-06-06" name="zangyo_date"></td>
+                  <td class="m-0 p-0">
+                    <!-- <input type="text" class="form-control" placeholder="ex)2018-06-06" name="zangyo_date"> -->
+                    <div id="datepicker-default">
+                      <div class="form-inline">
+                        <div class="input-group date">
+                          <input type="text" class="form-control" placeholder="ex)2018-06-06" name="zangyo_date" autocomplete="off">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
                   <td class="m-0 p-0">
                     <select class="form-control" name="zangyo_category">
                       <option value="1">残業</option>
@@ -158,7 +170,7 @@ $pdo = db_connect();
 
 
       <h4>最新情報</h4>
-      <table class="table table-striped table-bordered table-condensed">
+      <table class="table table-striped table-bordered table-condensed text-center">
         <thead>
           <tr>
             <th>実施日</th>
@@ -185,7 +197,7 @@ $pdo = db_connect();
               LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
               LEFT OUTER JOIN department ON employee.department_id = department.department_id)
               LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
-              ORDER BY id DESC
+              ORDER BY zangyo_date DESC
               ";
               //                        where id=(select max(id) from zangyo)";
               $stmh=$pdo->prepare($sql);
@@ -214,7 +226,7 @@ $pdo = db_connect();
                 if(Is_null($row['result_time']) == TRUE){
                   echo "";
                 }else {
-                  echo htmlspecialchars($row['result_time'],ENT_QUOTES);
+                  echo htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES);
                 }
                 ?></td>
                 <td><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
@@ -227,7 +239,7 @@ $pdo = db_connect();
                 <td></td><!--確認-->
                 <td><?=htmlspecialchars($row['project'],ENT_QUOTES)?></td><!--機種-->
                 <td><?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?></td><!--内容-->
-                <td><?=mb_strimwidth(htmlspecialchars($row['remarks'],ENT_QUOTES),0,30,"...")?></td><!--備考-->
+                <td><?=htmlspecialchars($row['remarks'],ENT_QUOTES)?></td><!--備考-->
               </tr>
               <?php
             }
@@ -236,17 +248,7 @@ $pdo = db_connect();
         </tbody>
       </table>
 
-      <div class="form-group" id="datepicker-default">
-        <label class="col-sm-3 control-label">Default</label>
-        <div class="col-sm-9 form-inline">
-          <div class="input-group date">
-            <input type="text" class="form-control" value="20170621">
-            <div class="input-group-addon">
-              <i class="fa fa-calendar"></i>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
     </main>
     </div>
@@ -276,7 +278,8 @@ $(function(){
     $('#datepicker-default .date').datepicker({
         format: "yyyy-mm-dd",
         language: 'ja',
-        autoclose: true
+        autoclose: true,
+        defaultDate: 0
     });
 
 });

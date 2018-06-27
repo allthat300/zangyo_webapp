@@ -23,7 +23,7 @@ $pdo = db_connect();
 
 <body>
   <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">  <!--トップナビゲーションバー-->
-    <a class="navbar-brand col-sm-1 col-md-1 mr-0" href="index.html">残業管理</a>  <!--ページ最上部へ移動-->
+    <a class="navbar-brand col-sm-1 col-md-1 mr-0" href="index.php">残業管理</a>  <!--ページ最上部へ移動-->
   </nav>
 
   <div class="container-fluid"> <!-- コンテナ：フルサイズ -->
