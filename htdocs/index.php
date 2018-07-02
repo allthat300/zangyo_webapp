@@ -223,8 +223,8 @@ $pdo = db_connect();
     </main>
 
     <footer class="footer">
-      <div class="container">
-        <span class="text-muted">Place sticky footer content here.</span>
+      <div class="container text-center">
+        <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
       </div>
     </footer>
 

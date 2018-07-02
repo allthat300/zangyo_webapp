@@ -89,12 +89,13 @@ $pdo = db_connect();
         </tr>
       </thead>
       <tbody>
+
         <form name="form1" method="post" action="#">
           <tr>
             <td class="m-0 p-0">
               <div id="datepicker-default">
                 <div class="form-inline">
-                  <div class="input-group date">
+                  <div class="input-group date w-100">
                     <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off">
                     <div class="input-group-addon">
                       <i class="fa fa-calendar"></i>
@@ -106,7 +107,7 @@ $pdo = db_connect();
             <td class="m-0 p-0">
               <div id="datepicker-default">
                 <div class="form-inline">
-                  <div class="input-group date">
+                  <div class="input-group date w-100">
                     <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off">
                     <div class="input-group-addon">
                       <i class="fa fa-calendar"></i>
@@ -117,27 +118,29 @@ $pdo = db_connect();
             </td>
             <td class="m-0 p-0">
               <select class="form-control" name="search_emplyee_name">
-              <?php
-              try{
-                $sql="SELECT * from employee";
-                $stmh=$pdo->prepare($sql);
-                $stmh->execute();
-                $count=$stmh->rowCount();
-              }catch(PDOException $Exception){
-                print"エラー：".$Exception->getMessage();
-              }
-              if($count>0){
-                while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
-                  ?>
-                  <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></option>
-                  <?php
+                <option value="*">(指定なし)</option>
+                <?php
+                try{
+                  $sql="SELECT * from employee";
+                  $stmh=$pdo->prepare($sql);
+                  $stmh->execute();
+                  $count=$stmh->rowCount();
+                }catch(PDOException $Exception){
+                  print"エラー：".$Exception->getMessage();
                 }
-              }
-              ?>
-            </select>
-          </td>
+                if($count>0){
+                  while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+                    ?>
+                    <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></option>
+                    <?php
+                  }
+                }
+                ?>
+              </select>
+            </td>
             <td class="m-0 p-0">
               <select class="form-control" name="search_department_id">
+                <option value="*">(指定なし)</option>
                 <?php
                 try{
                   $sql="SELECT * from department";
@@ -159,6 +162,7 @@ $pdo = db_connect();
             </td>
             <td class="m-0 p-0">
               <select class="form-control" name="search_group_id">
+                <option value="*">(指定なし)</option>
                 <?php
                 try{
                   $sql="SELECT * from work_group";
@@ -182,28 +186,28 @@ $pdo = db_connect();
 
         </tbody>
       </table>
-
-      <button class="btn btn-primary btn-lg btn-block" type="submit" name='application' value='send'>送信</button>
+      <button class="btn btn-primary" type="submit" name='action' value='search'>検索</button>
     </form>
   </div>
   <hr>
+
   <?php
+  if($_POST['search_start_date'] == ""){
+    $sql_search_start_date = "a";
+  }else {
+    $sql_search_start_date = "b";
+  }
 
-  ?>
+$sql_where = "";
 
-
-
-
-  <button class="btn btn-primary" type="submit" name='action' value='search'>検索</button>
-  <?php
   try{
     $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,department.department_name,work_group.group_name
     from ((((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
     LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
     LEFT OUTER JOIN department ON employee.department_id = department.department_id)
-    LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
-    ORDER BY zangyo_date DESC
-    ";
+    LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)"
+    . $sql_where .
+    "ORDER BY zangyo_date DESC";
     //                        where id=(select max(id) from zangyo)";
     $stmh=$pdo->prepare($sql);
     $stmh->execute();
@@ -211,6 +215,10 @@ $pdo = db_connect();
   }catch(PDOException $Exception){
     print"エラー：".$Exception->getMessage();
   }
+
+  print_r($_POST);
+  echo $sql_search_start_date;
+  echo $_POST['search_start_date'];
   ?>
   <hr>
   <form method="get" action="zangyo_check.php">
@@ -303,43 +311,43 @@ $pdo = db_connect();
 
       </main>
       <footer class="footer">
-        <div class="container">
-          <span class="text-muted">Place sticky footer content here.</span>
+        <div class="container text-center">
+          <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
         </div>
       </footer>
 
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-  <script src="/dist/js/vendor/popper.min.js"></script>
-  <script src="/dist/js/bootstrap.min.js"></script>
+      <!-- Bootstrap core JavaScript
+      ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+      <script src="/dist/js/vendor/popper.min.js"></script>
+      <script src="/dist/js/bootstrap.min.js"></script>
 
-  <!-- Icons -->
-  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-  <script>
-  feather.replace()
-  </script>
+      <!-- Icons -->
+      <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+      <script>
+      feather.replace()
+      </script>
 
-  <!-- Datepicker -->
-  <script type="text/javascript" src="/dist/js/bootstrap-datepicker.min.js"></script>
-  <script type="text/javascript" src="/dist/js/bootstrap-datepicker.ja.js"></script>
+      <!-- Datepicker -->
+      <script type="text/javascript" src="/dist/js/bootstrap-datepicker.min.js"></script>
+      <script type="text/javascript" src="/dist/js/bootstrap-datepicker.ja.js"></script>
 
-  <script>
-  $(function(){
-    //Default
-    $('#datepicker-default .date').datepicker({
-      format: "yyyy-mm-dd",
-      language: 'ja',
-      autoclose: true,
-      todayBtn: 'linked',
-      defaultDate: 0
-    });
+      <script>
+      $(function(){
+        //Default
+        $('#datepicker-default .date').datepicker({
+          format: "yyyy-mm-dd",
+          language: 'ja',
+          autoclose: true,
+          todayBtn: 'linked',
+          defaultDate: 0
+        });
 
-  });
-  </script>
+      });
+      </script>
 
 
-</body>
-</html>
+    </body>
+    </html>
