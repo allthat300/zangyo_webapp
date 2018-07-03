@@ -1,6 +1,12 @@
 <?php
 
-  foreach($_POST as $id => $result_time)
+
+
+if(!empty($_POST['id'])){
+
+  //print_r($_POST);
+
+  foreach($_POST['id'] as $id => $result_time)
   {
     $count_jisseki = 0;
     if($result_time <> "")
@@ -10,7 +16,7 @@
         $sql = "UPDATE zangyo SET result_time = :result_time WHERE id = :id";
         $stmh = $pdo->prepare($sql);  //prepareメソッドで各テーブル名(date,case_id...)に対しパラメータ(:date,:case_id...)を与える。
 
-        $stmh->bindValue(':id',substr($id,1),PDO::PARAM_INT);
+        $stmh->bindValue(':id',$id,PDO::PARAM_INT);
         $stmh->bindValue(':result_time',$result_time,PDO::PARAM_STR);
         $stmh->execute(); //プリペアドステートメントの実行
         $pdo->commit(); //トランザクションをコミット
@@ -22,3 +28,4 @@
       }
     }
   }
+}

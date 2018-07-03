@@ -54,16 +54,16 @@ $pdo = db_connect();
           <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">設定</a>
           <div class="dropdown-menu" aria-labelledby="dropdown04">
             <a class="dropdown-item" href="add-employee.php">社員追加</a>
-            <a class="dropdown-item" href="#">部署変更</a>
+            <a class="dropdown-item" href="edit-department.php">部署変更</a>
             <a class="dropdown-item" href="#">*****</a>
           </div>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">レポート</a>
           <div class="dropdown-menu" aria-labelledby="dropdown04">
-            <a class="dropdown-item" href="#">期間</a>
-            <a class="dropdown-item" href="#">部署</a>
-            <a class="dropdown-item" href="#">個人</a>
+            <a class="dropdown-item" href="report-time.php">期間</a>
+            <a class="dropdown-item" href="report-department.php">*****</a>
+            <a class="dropdown-item" href="report-employee.php">*****</a>
           </div>
         </li>
       </ul>
