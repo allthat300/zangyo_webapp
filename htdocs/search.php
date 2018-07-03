@@ -75,9 +75,6 @@ $pdo = db_connect();
     <h1 class="h1 my-3">検索・編集・削除</h1>
     <h4>検索条件</h4>
 
-    <?php
-
-    ?>
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -96,7 +93,7 @@ $pdo = db_connect();
               <div id="datepicker-default">
                 <div class="form-inline">
                   <div class="input-group date w-100">
-                    <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off">
+                    <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off" value="<?php if(!empty($_POST['search_start_date'])){echo $_POST['search_start_date'];}?>">
                     <div class="input-group-addon">
                       <i class="fa fa-calendar"></i>
                     </div>
@@ -108,7 +105,7 @@ $pdo = db_connect();
               <div id="datepicker-default">
                 <div class="form-inline">
                   <div class="input-group date w-100">
-                    <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off">
+                    <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off" value="<?php if(!empty($_POST['search_end_date'])){echo $_POST['search_end_date'];}?>">
                     <div class="input-group-addon">
                       <i class="fa fa-calendar"></i>
                     </div>
@@ -117,8 +114,8 @@ $pdo = db_connect();
               </div>
             </td>
             <td class="m-0 p-0">
-              <select class="form-control" name="search_emplyee_name">
-                <option value="*">(指定なし)</option>
+              <select class="form-control" name="search_employee_id">
+                <option value="" <?php if(empty($_POST['search_employee_id'])){echo "selected";} ?>>(指定なし)</option>
                 <?php
                 try{
                   $sql="SELECT * from employee";
@@ -131,7 +128,7 @@ $pdo = db_connect();
                 if($count>0){
                   while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                     ?>
-                    <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></option>
+                    <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>" <?php if($_POST['search_employee_id'] == htmlspecialchars($row['employee_id'],ENT_QUOTES)){echo "selected";} ?>><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></option>
                     <?php
                   }
                 }
@@ -139,8 +136,14 @@ $pdo = db_connect();
               </select>
             </td>
             <td class="m-0 p-0">
-              <select class="form-control" name="search_department_id">
-                <option value="*">(指定なし)</option>
+              <select class="form-control" name="search_department_id" value="
+              <?php
+              if(!empty($_POST['search_department_id'])){
+                echo $_POST['search_department_id'];
+              }
+              ?>
+              ">
+                <option value="">(指定なし)</option>
                 <?php
                 try{
                   $sql="SELECT * from department";
@@ -153,7 +156,7 @@ $pdo = db_connect();
                 if($count>0){
                   while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                     ?>
-                    <option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></option>
+                    <option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>" <?php if($_POST['search_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){echo "selected";} ?>><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></option>
                     <?php
                   }
                 }
@@ -161,8 +164,14 @@ $pdo = db_connect();
               </select>
             </td>
             <td class="m-0 p-0">
-              <select class="form-control" name="search_group_id">
-                <option value="*">(指定なし)</option>
+              <select class="form-control" name="search_group_id" value="
+              <?php
+              if(!empty($_POST['search_group_id'])){
+                echo $_POST['search_group_id'];
+              }
+              ?>
+              ">
+                <option value="">(指定なし)</option>
                 <?php
                 try{
                   $sql="SELECT * from work_group";
@@ -175,7 +184,7 @@ $pdo = db_connect();
                 if($count>0){
                   while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                     ?>
-                    <option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>"><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></option>
+                    <option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>" <?php if($_POST['search_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){echo "selected";} ?>><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></option>
                     <?php
                   }
                 }
@@ -186,28 +195,51 @@ $pdo = db_connect();
 
         </tbody>
       </table>
-      <button class="btn btn-primary" type="submit" name='action' value='search'>検索</button>
+      <button class="btn btn-lg btn-primary" type="submit" name='action' value='search'>検索</button>
     </form>
   </div>
   <hr>
 
   <?php
-  if($_POST['search_start_date'] == ""){
-    $sql_search_start_date = "a";
-  }else {
-    $sql_search_start_date = "b";
+  if(!empty($_POST['search_start_date'])){
+    $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
+  }else{
+    $sql_search_start_date = "";
   }
 
-$sql_where = "";
+  if(!empty($_POST['search_end_date'])){
+    $sql_search_end_date = " AND zangyo_date <= '" . $_POST['search_end_date'] ." 23:59:59'";
+  }else{
+    $sql_search_end_date = "";
+  }
+
+  if(!empty($_POST['search_employee_id'])){
+    $sql_search_employee_id = " AND employee.employee_id = " . $_POST['search_employee_id'];
+  }else{
+    $sql_search_employee_id = "";
+  }
+
+  if(!empty($_POST['search_department_id'])){
+    $sql_search_department_id = " AND department.department_id = " . $_POST['search_department_id'];
+  }else{
+    $sql_search_department_id = "";
+  }
+
+  if(!empty($_POST['search_group_id'])){
+    $sql_search_group_id = " AND work_group.group_id = " . $_POST['search_group_id'];
+  }else{
+    $sql_search_group_id = "";
+  }
+  $sql_where = " WHERE 1 ". $sql_search_start_date . $sql_search_end_date . $sql_search_employee_id . $sql_search_department_id . $sql_search_group_id;
 
   try{
-    $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,department.department_name,work_group.group_name
+    $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,employee.department_id,department.department_name,employee.group_id,work_group.group_name
     from ((((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
     LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
     LEFT OUTER JOIN department ON employee.department_id = department.department_id)
     LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)"
     . $sql_where .
-    "ORDER BY zangyo_date DESC";
+    " ORDER BY zangyo_date DESC";
     //                        where id=(select max(id) from zangyo)";
     $stmh=$pdo->prepare($sql);
     $stmh->execute();
@@ -216,14 +248,11 @@ $sql_where = "";
     print"エラー：".$Exception->getMessage();
   }
 
-  print_r($_POST);
-  echo $sql_search_start_date;
-  echo $_POST['search_start_date'];
   ?>
   <hr>
   <form method="get" action="zangyo_check.php">
-    <button class="btn btn-primary" type="submit" name='action' value='edit'>編集</button>
-    <button class="btn btn-primary" type="submit" name='action' value='delete'>削除</button>
+    <button class="btn btn-lg btn-primary" type="submit" name='action' value='edit'>編集</button>
+    <button class="btn btn-lg btn-primary" type="submit" name='action' value='delete'>削除</button>
     <hr>
 
     <div class="table-responsive">
@@ -231,7 +260,7 @@ $sql_where = "";
         <thead>
           <tr>
             <th style="width:50px;"></th>
-            <th style="width:150px;">実施日</th>
+            <th style="width:200px;">実施日</th>
             <th style="width:100px;">種別</th>
             <th style="width:150px;">名前</th>
             <th style="width:150px;">部署</th>
@@ -305,8 +334,8 @@ $sql_where = "";
       </div>
       <hr>
       <form method="get" action="zangyo_check.php">
-        <button class="btn btn-primary" type="submit" name='action' value='edit'>編集</button>
-        <button class="btn btn-primary" type="submit" name='action' value='delete'>削除</button>
+        <button class="btn btn-lg btn-primary" type="submit" name='action' value='edit'>編集</button>
+        <button class="btn btn-lg btn-primary" type="submit" name='action' value='delete'>削除</button>
         <hr>
 
       </main>

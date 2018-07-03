@@ -74,7 +74,7 @@ $pdo = db_connect();
 
       <h1 class="h1 my-3">実績入力</h1>
       <form name="form2" method="post" action="jisseki.php">
-        <button class="btn btn-primary btn-lg btn-block" type="submit">送信</button>
+        <button class="btn btn-primary btn-lg" type="submit">送信</button>
         <hr>
         <?php require("../php_libs/UPDATE_JISSEKI.php"); ?>
         <hr>

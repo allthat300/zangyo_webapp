@@ -101,168 +101,173 @@ $pdo = db_connect();
       ?>
 
       <?php
-      try{
-        $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.case_id,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,department.department_name,work_group.group_name
-        from ((((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
-        LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
-        LEFT OUTER JOIN department ON employee.department_id = department.department_id)
-        LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
-        WHERE id IN(" . implode(",",$_GET['id']) . ")
-        ORDER BY zangyo_date DESC
-        ";
-        //                        where id=(select max(id) from zangyo)";
-        $stmh=$pdo->prepare($sql);
-        $stmh->execute();
-        $count=$stmh->rowCount();
-      }catch(PDOException $Exception){
-        print"エラー：".$Exception->getMessage();
-      }
+      if(!empty($_GET['id'])){
+        try{
+          $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.case_id,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,department.department_name,work_group.group_name
+          from ((((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
+          LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
+          LEFT OUTER JOIN department ON employee.department_id = department.department_id)
+          LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+          WHERE id IN(" . implode(",",$_GET['id']) . ")
+          ORDER BY zangyo_date DESC
+          ";
+          //                        where id=(select max(id) from zangyo)";
+          $stmh=$pdo->prepare($sql);
+          $stmh->execute();
+          $count=$stmh->rowCount();
+        }catch(PDOException $Exception){
+          print"エラー：".$Exception->getMessage();
+        }
 
-      if($count>0){
-        $count_edit=1;
-        while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
-          ?>
+        if($count>0){
+          $count_edit=1;
+          while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+            ?>
 
-          <!-- **********テーブル1段目(開始)********** -->
-          <h5><?= $count_edit ?>件目</h5>
-          <table class="table table-striped table-bordered table-condensed text-center">
-            <thead>
-              <tr>
-                <th style="width:150px;">実施日</th>
-                <th style="width:100px;">種別</th>
-                <th style="width:150px;">名前</th>
-                <th style="width:150px;">部署</th>
-                <th style="width:150px;">グループ</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <form method="post" action="UPDATE_ALL.php">
-                  <td class="m-0 p-0">
-                    <div id="datepicker-default">
-                      <div class="form-inline">
-                        <div class="input-group date">
-                          <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][zangyo_date]" value="<?=htmlspecialchars(substr($row['zangyo_date'],0,10),ENT_QUOTES)?>"　autocomplete="off">
-                          <div class="input-group-addon">
-                            <i class="fa fa-calendar"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <!--実施日-->
-
-                  <td class="m-0 p-0">
-                    <select class="form-control" name="zangyo[<?=$row['id']?>][case_id]">
-                      <option value="1"<?php if($row['case_id'] == 1){echo "selected";} ?>>残業</option>
-                      <option value="2"<?php if($row['case_id'] == 2){echo "selected";} ?>>早出</option>
-                      <option value="3"<?php if($row['case_id'] == 3){echo "selected";} ?>>FLEX</option>
-                      <option value="4"<?php if($row['case_id'] == 4){echo "selected";} ?>>休出</option>
-                      <option value="5"<?php if($row['case_id'] == 5){echo "selected";} ?>>代休</option>
-                    </select>
-                  </td><!--種別-->
-
-
-                  <td class="m-0 p-1"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td><!--名前-->
-                  <td class="m-0 p-1"><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td><!--部署-->
-                  <td class="m-0 p-1"><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td><!--グループ-->
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- **********テーブル1段目(終了)********** -->
-
-            <!-- **********テーブル2段目(開始)********** -->
-
+            <!-- **********テーブル1段目(開始)********** -->
+            <h5><?= $count_edit ?>件目</h5>
             <table class="table table-striped table-bordered table-condensed text-center">
               <thead>
                 <tr>
-                  <th style="width:150px;">申請時間</th>
-                  <th style="width:150px;">実施時間</th>
-                  <th style="width:150px;">月間累計</th>
-                  <th style="width:150px;">年間累計</th>
+                  <th style="width:150px;">実施日</th>
+                  <th style="width:100px;">種別</th>
+                  <th style="width:150px;">名前</th>
+                  <th style="width:150px;">部署</th>
+                  <th style="width:150px;">グループ</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td class="m-0 p-0">
-                    <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][app_time]" value="<?=htmlspecialchars(substr($row['app_time'],0,5),ENT_QUOTES)?>">
-                  </td>
-                  <!--申請時間-->
+                  <form method="post" action="UPDATE_ALL.php">
+                    <td class="m-0 p-0">
+                      <div id="datepicker-default">
+                        <div class="form-inline">
+                          <div class="input-group date w-100">
+                            <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][zangyo_date]" value="<?=htmlspecialchars(substr($row['zangyo_date'],0,10),ENT_QUOTES)?>"　autocomplete="off">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <!--実施日-->
+
+                    <td class="m-0 p-0">
+                      <select class="form-control" name="zangyo[<?=$row['id']?>][case_id]">
+                        <option value="1"<?php if($row['case_id'] == 1){echo "selected";} ?>>残業</option>
+                        <option value="2"<?php if($row['case_id'] == 2){echo "selected";} ?>>早出</option>
+                        <option value="3"<?php if($row['case_id'] == 3){echo "selected";} ?>>FLEX</option>
+                        <option value="4"<?php if($row['case_id'] == 4){echo "selected";} ?>>休出</option>
+                        <option value="5"<?php if($row['case_id'] == 5){echo "selected";} ?>>代休</option>
+                      </select>
+                    </td><!--種別-->
 
 
-                  <td class="m-0 p-0">
-                    <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][result_time]" value="<?=htmlspecialchars(substr($row['result_time'],0,5),ENT_QUOTES)?>">
-                  </td>
-                  <!--実施時間-->
-                  <td class="m-0 p-1"><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                  <td class="m-0 p-1"><!--年間累計-->
-                    <?php
-                    require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                    require("../php_libs/SUM_YEAR.php");
-                    ?>
+                    <td class="m-0 p-1"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td><!--名前-->
+                    <td class="m-0 p-1"><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td><!--部署-->
+                    <td class="m-0 p-1"><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td><!--グループ-->
                   </tr>
                 </tbody>
               </table>
 
-              <!-- **********テーブル2段目(終了)********** -->
+              <!-- **********テーブル1段目(終了)********** -->
 
-              <!-- **********テーブル3段目(開始)********** -->
+              <!-- **********テーブル2段目(開始)********** -->
 
               <table class="table table-striped table-bordered table-condensed text-center">
                 <thead>
                   <tr>
-                    <th style="width:100px;">確認</th>
-                    <th style="width:200px;">機種</th>
-                    <th style="width:400px;">内容</th>
-                    <th style="width:600px;">備考</th>
+                    <th style="width:150px;">申請時間</th>
+                    <th style="width:150px;">実施時間</th>
+                    <th style="width:150px;">月間累計</th>
+                    <th style="width:150px;">年間累計</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td class="m-0 p-0">
-                      <select class="form-control" name="zangyo[<?=$row['id']?>][boss_check]">
-                        <option value="1"<?php if($row['boss_check'] == 0){echo "selected";} ?>></option>
-                        <option value="2"<?php if($row['boss_check'] == 1){echo "selected";} ?>>済</option>
-                      </select>
-                    </td><!--確認-->
+                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][app_time]" value="<?=htmlspecialchars(substr($row['app_time'],0,5),ENT_QUOTES)?>">
+                    </td>
+                    <!--申請時間-->
 
 
                     <td class="m-0 p-0">
-                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][project]" value="<?=htmlspecialchars($row['project'],ENT_QUOTES)?>">
+                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][result_time]" value="<?=htmlspecialchars(substr($row['result_time'],0,5),ENT_QUOTES)?>">
                     </td>
-                    <!--機種-->
+                    <!--実施時間-->
+                    <td class="m-0 p-1"><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
+                    <td class="m-0 p-1"><!--年間累計-->
+                      <?php
+                      require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                      require("../php_libs/SUM_YEAR.php");
+                      ?>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- **********テーブル2段目(終了)********** -->
+
+                <!-- **********テーブル3段目(開始)********** -->
+
+                <table class="table table-striped table-bordered table-condensed text-center">
+                  <thead>
+                    <tr>
+                      <th style="width:100px;">確認</th>
+                      <th style="width:200px;">機種</th>
+                      <th style="width:400px;">内容</th>
+                      <th style="width:600px;">備考</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="m-0 p-0">
+                        <select class="form-control" name="zangyo[<?=$row['id']?>][boss_check]">
+                          <option value="1"<?php if($row['boss_check'] == 0){echo "selected";} ?>></option>
+                          <option value="2"<?php if($row['boss_check'] == 1){echo "selected";} ?>>済</option>
+                        </select>
+                      </td><!--確認-->
 
 
-                    <td class="m-0 p-0">
-                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][project_detail]" value="<?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?>">
-                    </td>
-                    <!--内容-->
+                      <td class="m-0 p-0">
+                        <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][project]" value="<?=htmlspecialchars($row['project'],ENT_QUOTES)?>">
+                      </td>
+                      <!--機種-->
 
 
-                    <td class="m-0 p-0">
-                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][remarks]" value="<?=htmlspecialchars($row['remarks'],ENT_QUOTES)?>">
-                    </td>
-                    <!--備考-->
+                      <td class="m-0 p-0">
+                        <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][project_detail]" value="<?=htmlspecialchars($row['project_detail'],ENT_QUOTES)?>">
+                      </td>
+                      <!--内容-->
 
 
-                  </tr>
-                </tbody>
-              </table>
+                      <td class="m-0 p-0">
+                        <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][remarks]" value="<?=htmlspecialchars($row['remarks'],ENT_QUOTES)?>">
+                      </td>
+                      <!--備考-->
 
-              <!-- **********テーブル3段目(終了)********** -->
-              <br>
-              <hr>
-              <?php
-              $count_edit++;
+
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- **********テーブル3段目(終了)********** -->
+                <br>
+                <hr>
+                <?php
+                $count_edit++;
+              }
             }
-          }
-          ?>
-          <button class="btn btn-primary" type="submit" name='action' value='edit'>送信</button>
-        </form>
-        <br>
-        <br>
-        <?php
+            ?>
+            <button class="btn btn-lg btn-primary" type="submit" name='action' value='edit'>送信</button>
+          </form>
+          <br>
+          <br>
+          <?php
+        }else{
+          header('Location: search.php', true, 301); //searchにリダイレクト
+          exit;//すべての出力を終了
+        }
       }
       //****************************************編集の処理(終了)****************************************
       elseif($_GET['action'] == "delete")
@@ -395,7 +400,7 @@ $pdo = db_connect();
                 </tbody>
               </table>
             </div>
-            <button class="btn btn-primary" type="submit" name='action' value='approve'>承認</button>
+            <button class="btn btn-lg btn-primary" type="submit" name='action' value='approve'>承認</button>
           </form>
           <?php
         }

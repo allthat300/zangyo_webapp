@@ -127,7 +127,7 @@ $pdo = db_connect();
           </table>
 
         </div>
-        <button class="btn btn-primary btn-lg btn-block" type="submit" name='application' value='send'>送信</button>
+        <button class="btn btn-primary btn-lg" type="submit" name='application' value='send'>送信</button>
       </form>
     </div>
     <hr>

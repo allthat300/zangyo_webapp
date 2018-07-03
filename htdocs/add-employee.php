@@ -135,7 +135,7 @@ $pdo = db_connect();
 
           </tbody>
         </table>
-        <button class="btn btn-primary btn-lg btn-block" type="submit" name='add-employee' value='send'>登録</button>
+        <button class="btn btn-primary btn-lg" type="submit" name='add-employee' value='send'>登録</button>
       </form>
     </div>
     <hr>
