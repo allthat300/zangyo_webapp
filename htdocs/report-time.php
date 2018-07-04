@@ -105,13 +105,13 @@ $pdo = db_connect();
         </thead>
         <tbody>
 
-          <form name="form1" method="post" action="#">
+          <form name="form1" method="post" action="report-time.php">
             <tr>
               <td class="m-0 p-0">
                 <div id="year-month">
                   <div class="form-inline">
                     <div class="input-group date w-100">
-                      <input type="text" class="form-control" placeholder="ex)2018-04" name="search_month" autocomplete="off" value="<?php if(!empty($_POST['search_month'])){echo $_POST['search_month'];}?>">
+                      <input type="text" class="form-control" placeholder="ex)2018-04" name="report_month" autocomplete="off" value="<?php if(!empty($_POST['report_month'])){echo $_POST['report_month'];}?>">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
@@ -120,8 +120,8 @@ $pdo = db_connect();
                 </div>
               </td>
               <td class="m-0 p-0">
-                <select class="form-control" name="search_department_id">
-                  <option value="" <?php if(empty($_POST['search_department_id'])){echo "selected";} ?>>(指定なし)</option>
+                <select class="form-control" name="report_department_id">
+                  <option value="" <?php if(empty($_POST['report_department_id'])){echo "selected";} ?>>(指定なし)</option>
                   <?php
                   try{
                     $sql="SELECT * from department";
@@ -136,8 +136,8 @@ $pdo = db_connect();
                       ?>
                       <option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>"
                         <?php
-                        if(!empty($_POST['search_department_id'])){
-                          if($_POST['search_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){
+                        if(!empty($_POST['report_department_id'])){
+                          if($_POST['report_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){
                             echo "selected";
                           }
                         }
@@ -152,10 +152,10 @@ $pdo = db_connect();
                 </select>
               </td>
               <td class="m-0 p-0">
-                <select class="form-control" name="search_group_id" value="
+                <select class="form-control" name="report_group_id" value="
                 <?php
-                if(!empty($_POST['search_group_id'])){
-                  echo $_POST['search_group_id'];
+                if(!empty($_POST['report_group_id'])){
+                  echo $_POST['report_group_id'];
                 }
                 ?>
                 ">
@@ -174,8 +174,8 @@ $pdo = db_connect();
                     ?>
                     <option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>"
                       <?php
-                      if(!empty($_POST['search_group_id'])){
-                        if($_POST['search_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){
+                      if(!empty($_POST['report_group_id'])){
+                        if($_POST['report_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){
                           echo "selected";
                         }
                       }
@@ -193,252 +193,180 @@ $pdo = db_connect();
 
         </tbody>
       </table>
-      <button class="btn btn-lg btn-primary" type="submit" name='action' value='search'>検索</button>
+      <button class="btn btn-lg btn-primary" type="submit" name='action' value='report'>検索</button>
     </form>
   </div>
 
-<?php
+  <?php
   print_r($_POST);
 
-  if(!empty($_POST['search_month'])){
-    $sql_month = " AND zangyo_date LIKE '" . $_POST['search_month'] ."%'";
+  if(!empty($_POST['report_month'])){
+    $sql_month = " AND zangyo_date LIKE '" . $_POST['report_month'] ."%'";
   }else{
     $sql_month = "";
   }
 
-  if(!empty($_POST['search_department_id'])){
-    $sql_department = " AND department.department_id = '" . $_POST['search_department_id'] ."'";
+  if(!empty($_POST['report_department_id'])){
+    $sql_department = " AND department.department_id = '" . $_POST['report_department_id'] ."' ";
   }else{
     $sql_department = "";
   }
 
-  if(!empty($_POST['search_group_id'])){
-    $sql_group = " AND work_group.group_id = '" . $_POST['search_group_id'] ."'";
+  if(!empty($_POST['report_group_id'])){
+    $sql_group = " AND work_group.group_id = '" . $_POST['report_group_id'] ."' ";
   }else{
     $sql_group = "";
   }
 
-  $sql_where = "WHERE 1 " . $sql_month . $sql_department . $sql_group;
+  if(!empty($_POST['report_month'])){
+    $first_date = date('Y-m-d', strtotime('first day of ' . $_POST['report_month']));
+  }else{
+    $first_date = date("Y-m-01");
+  }
 
-    try{
-      $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.employee_id,employee.employee_name,zangyo.result_time,employee.department_id,department.department_name,employee.group_id,work_group.group_name
-      from (((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
-      LEFT OUTER JOIN department ON employee.department_id = department.department_id)
-      LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)"
-      . $sql_where .
-      "ORDER BY zangyo_date DESC";
-      //                        where id=(select max(id) from zangyo)";
-      $stmh=$pdo->prepare($sql);
-      $stmh->execute();
-      $count=$stmh->rowCount();
-    }catch(PDOException $Exception){
-      print"エラー：".$Exception->getMessage();
-    }
+  if(!empty($_POST['report_month'])){
+    $num_date = date('t', strtotime($_POST['report_month']));
+  }else{
+    $num_date = date("t");
+  }
 
-    ?>
+  $array_report[] = ["day" => $first_date, "jisseki" =>"", "sum" =>""];
+  for ($i = 1 ; $i < $num_date ; $i++){
+    $array_report[]["day"] = date('Y-m-d', strtotime("$first_date + $i days"));
+  }
 
-          <table class="table table-striped table-bordered table-condensed">
-          <thead>
-            <tr>
-              <th>実施日</th>
-              <th>部署</th>
-              <th>グループ</th>
-              <th>実施時間</th>
-              <th>月間累計</th>
-              <th>年間累計</th>
-            </tr>
-          </thead>
-          <tbody>
+  //print_r($array_report)
 
-            <tr>
-              <?php
-              if($count>0){
-                while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
-                  ?>
-                  <td><!--実施日-->
-                    <?php
+  ?>
 
-                  $datetime = new DateTime($row['zangyo_date']);
-                  $week = array("日", "月", "火", "水", "木", "金", "土");
-                  $w = (int)$datetime->format('w');
-                  echo htmlspecialchars(substr($row['zangyo_date'],0,10),ENT_QUOTES) . " (" . $week[$w] . ")";
-                  ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
-                  <td><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td><!--部署-->
-                  <td><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td><!--グループ-->
-                  <td><!--実施時間-->
-                    <?php
-                    if(Is_null($row['result_time']) == TRUE){
-                      echo "";
-                    }else {
-                      echo htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES);
-                    }
-                    ?></td>
-                    <td>
+  <table class="table table-striped table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>実施日</th>
+        <th>実施時間</th>
+        <th>月間累計</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php
+      for($j = 0 ; $j < $num_date ; $j++){
 
+        //各日の実施時間を配列にいれる
 
-                      <?php
-                    try{
-                      $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(IFNULL(result_time,'00:00:00')))) AS sum_month_time from zangyo
-                      where zangyo_date BETWEEN '".substr($row['zangyo_date'],0,8)."01 00:00:00' AND '" . $row['zangyo_date'] . "' "
-                      . "AND employee_id = '" . $row['employee_id'] . "' "
-                      ."ORDER BY zangyo_date,case_id desc"; //""内の''や""はよくわからないので.で連結
-                      $stmh_sum_month=$pdo->prepare($sql_sum_month);
-                      $stmh_sum_month->execute();
-                      $count_sum_month=$stmh_sum_month->rowCount();
-                    }catch(PDOException $Exception_sum_month){
-                      print"エラー：".$Exception_sum_month->getMessage();
-                    }
-                    //echo $sql_sum_month;
-                    if($count_sum_month=0){
-                      echo "0";
-                    }else{
-                      while($row_sum_month=$stmh_sum_month->fetch(PDO::FETCH_ASSOC)){
-                        echo htmlspecialchars(substr($row_sum_month['sum_month_time'],0,5),ENT_QUOTES);
-                      }
-                    }
-                    ?>
-                  </td><!--月間累計-->
-                    <td></td><!--年間累計-->
-                  </tr>
-                  <?php
-                }
-              }
-              ?>
-            </tbody>
-          </table>
+        $sql_date_jisseki_start = "AND zangyo.zangyo_date >= '" . $array_report[$j]["day"] . " 00:00:00' ";
+        $sql_date_jisseki_end = "AND zangyo.zangyo_date <= '" . $array_report[$j]["day"] . " 23:59:59' ";
 
-          <?php
-
-          if(!empty($_POST['search_month'])){
-            $first_date = date('Y-m-d', strtotime('first day of ' . $_POST['search_month']));
-          }else{
-            $first_date = date("Y-m-01");
+        try{
+          $sql_report_jisseki="SELECT sec_to_time(sum(time_to_sec(IFNULL(zangyo.result_time,'00:00:00'))))
+          AS report_month
+          from (((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
+          LEFT OUTER JOIN department ON employee.department_id = department.department_id)
+          LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+          WHERE 1 "
+          . $sql_department
+          . $sql_group
+          . $sql_date_jisseki_start
+          . $sql_date_jisseki_end
+          . "ORDER BY zangyo_date DESC";
+          $stmh_report_jisseki=$pdo->prepare($sql_report_jisseki);
+          $stmh_report_jisseki->execute();
+          $count_report_jisseki=$stmh_report_jisseki->rowCount();
+        }catch(PDOException $Exception_report_jisseki){
+          print"エラー：".$Exception_report_jisseki->getMessage();
+        }
+        if($count_report_jisseki>0){
+          while($row_report_jisseki=$stmh_report_jisseki->fetch(PDO::FETCH_ASSOC)){
+            if($row_report_jisseki['report_month'] == ""){
+              $array_report[$j]["jisseki"] = "00:00:00";
+            }else{
+              $array_report[$j]["jisseki"] = htmlspecialchars($row_report_jisseki['report_month'],ENT_QUOTES);
+            }
           }
-
-          if(!empty($_POST['search_month'])){
-            $last_date = date('Y-m-d', strtotime('last day of ' . $_POST['search_month']));
-          }else{
-            $last_date = date("Y-m-t");
-          }
-          echo $first_date;
-          echo $last_date;
-          ?>
-
-          <table class="table table-striped table-bordered table-condensed">
-          <thead>
-            <tr>
-              <th>実施日</th>
-              <th>実施時間</th>
-              <th>月間累計</th>
-              <th>年間累計</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            <tr>
-                  <td><!--実施日-->
-                    <?php
-
-                  $datetime = new DateTime($array_days[]);
-                  $week = array("日", "月", "火", "水", "木", "金", "土");
-                  $w = (int)$datetime->format('w');
-                  echo htmlspecialchars(substr($row['zangyo_date'],0,10),ENT_QUOTES) . " (" . $week[$w] . ")";
-                  ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
-                  <td><!--実施時間-->
-                    <?php
-                    if(Is_null($row['result_time']) == TRUE){
-                      echo "";
-                    }else {
-                      echo htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES);
-                    }
-                    ?></td>
-                    <td>
+        }
 
 
-                      <?php
-                    try{
-                      $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(IFNULL(result_time,'00:00:00')))) AS sum_month_time from zangyo
-                      where zangyo_date BETWEEN '".substr($row['zangyo_date'],0,8)."01 00:00:00' AND '" . $row['zangyo_date'] . "' "
-                      . "AND employee_id = '" . $row['employee_id'] . "' "
-                      ."ORDER BY zangyo_date,case_id desc"; //""内の''や""はよくわからないので.で連結
-                      $stmh_sum_month=$pdo->prepare($sql_sum_month);
-                      $stmh_sum_month->execute();
-                      $count_sum_month=$stmh_sum_month->rowCount();
-                    }catch(PDOException $Exception_sum_month){
-                      print"エラー：".$Exception_sum_month->getMessage();
-                    }
-                    //echo $sql_sum_month;
-                    if($count_sum_month=0){
-                      echo "0";
-                    }else{
-                      while($row_sum_month=$stmh_sum_month->fetch(PDO::FETCH_ASSOC)){
-                        echo htmlspecialchars(substr($row_sum_month['sum_month_time'],0,5),ENT_QUOTES);
-                      }
-                    }
-                    ?>
-                  </td><!--月間累計-->
-                    <td></td><!--年間累計-->
-                  </tr>
-                  <?php
-                }
-              }
-              ?>
-            </tbody>
-          </table>
-
-      </main>
-
-      <footer class="footer">
-        <div class="container text-center">
-          <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
-        </div>
-      </footer>
-
-      <!-- Bootstrap core JavaScript
-      ================================================== -->
-      <!-- Placed at the end of the document so the pages load faster -->
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-      <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-      <script src="/dist/js/vendor/popper.min.js"></script>
-      <script src="/dist/js/bootstrap.min.js"></script>
-
-      <!-- Icons -->
-      <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-      <script>
-      feather.replace()
-    </script>
-
-    <!-- Datepicker -->
-    <script type="text/javascript" src="/dist/js/bootstrap-datepicker.min.js"></script>
-    <script type="text/javascript" src="/dist/js/bootstrap-datepicker.ja.js"></script>
-
-    <script>
-    $(function(){
-      //Default
-      $('#year-month .date').datepicker({
-        format: "yyyy-mm",
-        language: 'ja',
-        autoclose: true,
-        todayBtn: 'linked',
-        defaultDate: 0,
-        minViewMode: 'months'
-      });
-
-    });
-  </script>
+        //月間累計を配列にいれる
 
 
-  <!-- Graphs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-  <script>
-  window.onload = function() {
-    ctx = document.getElementById("myChart").getContext("2d");
-    window.myBar = new Chart(ctx, {
-      type: 'bar',
-      data: barChartData,
-      options: complexChartOption
-    });
-  };
+        ?>
+        <tr>
+          <td><!--実施日-->
+            <?php
+            $datetime = new DateTime($array_report[$j]['day']);
+            $week = array("日", "月", "火", "水", "木", "金", "土");
+            $w = (int)$datetime->format('w');
+            echo htmlspecialchars(substr($array_report[$j]['day'],0,10),ENT_QUOTES) . " (" . $week[$w] . ")";
+            ?>
+          </td>
+          <td><!--実施時間-->
+            <?php
+            echo htmlspecialchars(substr($array_report[$j]['jisseki'],0,-3),ENT_QUOTES);
+            ?>
+          </td>
+          <td>
+            <?php
+            //echo htmlspecialchars(substr($array_report[$j]['sum'],0,-3),ENT_QUOTES);
+            ?>
+          </td><!--月間累計-->
+        </tr>
+        <?php
+      }
+      ?>
+    </tbody>
+  </table>
+</main>
+
+<footer class="footer">
+  <div class="container text-center">
+    <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
+  </div>
+</footer>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="/dist/js/vendor/popper.min.js"></script>
+<script src="/dist/js/bootstrap.min.js"></script>
+
+<!-- Icons -->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
+feather.replace()
+</script>
+
+<!-- Datepicker -->
+<script type="text/javascript" src="/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript" src="/dist/js/bootstrap-datepicker.ja.js"></script>
+
+<script>
+$(function(){
+  //Default
+  $('#year-month .date').datepicker({
+    format: "yyyy-mm",
+    language: 'ja',
+    autoclose: true,
+    todayBtn: 'linked',
+    defaultDate: 0,
+    minViewMode: 'months'
+  });
+
+});
+</script>
+
+
+<!-- Graphs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+<script>
+window.onload = function() {
+  ctx = document.getElementById("myChart").getContext("2d");
+  window.myBar = new Chart(ctx, {
+    type: 'bar',
+    data: barChartData,
+    options: complexChartOption
+  });
+};
 </script>
 
 

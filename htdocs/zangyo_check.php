@@ -223,8 +223,8 @@ $pdo = db_connect();
                     <tr>
                       <td class="m-0 p-0">
                         <select class="form-control" name="zangyo[<?=$row['id']?>][boss_check]">
-                          <option value="1"<?php if($row['boss_check'] == 0){echo "selected";} ?>></option>
-                          <option value="2"<?php if($row['boss_check'] == 1){echo "selected";} ?>>済</option>
+                          <option value="0"<?php if($row['boss_check'] == 0){echo "selected";} ?>></option>
+                          <option value="1"<?php if($row['boss_check'] == 1){echo "selected";} ?>>済</option>
                         </select>
                       </td><!--確認-->
 
