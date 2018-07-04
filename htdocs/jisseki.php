@@ -71,14 +71,13 @@ $pdo = db_connect();
   </nav>
 
   <main role="main" class="container-fluid">
-
-    <h1 class="h1 my-3">実績入力</h1>
-    <form name="form2" method="post" action="jisseki.php">
-      <button class="btn btn-primary btn-lg" type="submit">送信</button>
-      <hr>
-      <?php require("../php_libs/UPDATE_JISSEKI.php"); ?>
-      <hr>
-      <table class="table table-striped table-bordered table-condensed">
+    <div class="border-bottom pb-2 mb-2">
+      <h1 class="h1 my-3">実績入力</h1>
+      <form name="form2" method="post" action="jisseki.php">
+        <button class="btn btn-primary btn-lg" type="submit">送信</button>
+        <?php require("../php_libs/UPDATE_JISSEKI.php"); ?>
+    </div>
+      <table class="table table-striped table-bordered table-condensed my-2">
         <thead>
           <tr>
             <th>実施日</th>

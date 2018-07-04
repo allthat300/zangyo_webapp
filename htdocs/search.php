@@ -74,7 +74,6 @@ $pdo = db_connect();
 
     <h1 class="h1 my-3">検索・編集・削除</h1>
     <h4>検索条件</h4>
-
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -128,7 +127,17 @@ $pdo = db_connect();
                 if($count>0){
                   while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                     ?>
-                    <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>" <?php if($_POST['search_employee_id'] == htmlspecialchars($row['employee_id'],ENT_QUOTES)){echo "selected";} ?>><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></option>
+                    <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>"
+                      <?php
+                      if(!empty($_POST['search_employee_id'])){
+                        if($_POST['search_employee_id'] == htmlspecialchars($row['employee_id'],ENT_QUOTES)){
+                          echo "selected";
+                        }
+                      }
+                      ?>
+                      >
+                      <?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?>
+                    </option>
                     <?php
                   }
                 }
@@ -136,14 +145,8 @@ $pdo = db_connect();
               </select>
             </td>
             <td class="m-0 p-0">
-              <select class="form-control" name="search_department_id" value="
-              <?php
-              if(!empty($_POST['search_department_id'])){
-                echo $_POST['search_department_id'];
-              }
-              ?>
-              ">
-                <option value="">(指定なし)</option>
+              <select class="form-control" name="search_department_id">
+                <option value="" <?php if(empty($_POST['search_department_id'])){echo "selected";} ?>>(指定なし)</option>
                 <?php
                 try{
                   $sql="SELECT * from department";
@@ -156,7 +159,17 @@ $pdo = db_connect();
                 if($count>0){
                   while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                     ?>
-                    <option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>" <?php if($_POST['search_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){echo "selected";} ?>><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></option>
+                    <option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>"
+                      <?php
+                      if(!empty($_POST['search_department_id'])){
+                        if($_POST['search_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){
+                          echo "selected";
+                        }
+                      }
+                      ?>
+                      >
+                      <?=htmlspecialchars($row['department_name'],ENT_QUOTES)?>
+                    </option>
                     <?php
                   }
                 }
@@ -171,34 +184,43 @@ $pdo = db_connect();
               }
               ?>
               ">
-                <option value="">(指定なし)</option>
-                <?php
-                try{
-                  $sql="SELECT * from work_group";
-                  $stmh=$pdo->prepare($sql);
-                  $stmh->execute();
-                  $count=$stmh->rowCount();
-                }catch(PDOException $Exception){
-                  print"エラー：".$Exception->getMessage();
-                }
-                if($count>0){
-                  while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
-                    ?>
-                    <option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>" <?php if($_POST['search_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){echo "selected";} ?>><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></option>
+              <option value="">(指定なし)</option>
+              <?php
+              try{
+                $sql="SELECT * from work_group";
+                $stmh=$pdo->prepare($sql);
+                $stmh->execute();
+                $count=$stmh->rowCount();
+              }catch(PDOException $Exception){
+                print"エラー：".$Exception->getMessage();
+              }
+              if($count>0){
+                while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+                  ?>
+                  <option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>"
                     <?php
-                  }
+                    if(!empty($_POST['search_group_id'])){
+                      if($_POST['search_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){
+                        echo "selected";
+                      }
+                    }
+                    ?>
+                    >
+                    <?=htmlspecialchars($row['group_name'],ENT_QUOTES)?>
+                  </option>
+                  <?php
                 }
-                ?>
-              </select>
-            </td>
-          </tr>
+              }
+              ?>
+            </select>
+          </td>
+        </tr>
 
-        </tbody>
-      </table>
-      <button class="btn btn-lg btn-primary" type="submit" name='action' value='search'>検索</button>
-    </form>
-  </div>
-  <hr>
+      </tbody>
+    </table>
+    <button class="btn btn-lg btn-primary" type="submit" name='action' value='search'>検索</button>
+  </form>
+
 
   <?php
   if(!empty($_POST['search_start_date'])){
@@ -249,11 +271,11 @@ $pdo = db_connect();
   }
 
   ?>
-  <hr>
-  <form method="get" action="zangyo_check.php">
-    <button class="btn btn-lg btn-primary" type="submit" name='action' value='edit'>編集</button>
-    <button class="btn btn-lg btn-primary" type="submit" name='action' value='delete'>削除</button>
-    <hr>
+  <div class="border-top border-bottom my-2 py-2">
+    <form method="get" action="zangyo_check.php">
+      <button class="btn btn-lg btn-primary" type="submit" name='action' value='edit'>編集</button>
+      <button class="btn btn-lg btn-primary" type="submit" name='action' value='delete'>削除</button>
+    </div>
 
     <div class="table-responsive">
       <table class="table table-striped table-bordered table-condensed table-responsive text-center" style="table-layout:fixed;">
