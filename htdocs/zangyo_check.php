@@ -61,8 +61,8 @@ $pdo = db_connect();
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">レポート</a>
           <div class="dropdown-menu" aria-labelledby="dropdown04">
-            <a class="dropdown-item" href="report-time.php">期間</a>
-            <a class="dropdown-item" href="report-department.php">*****</a>
+            <a class="dropdown-item" href="report-month.php">月間</a>
+            <a class="dropdown-item" href="report-year.php">年間</a>
             <a class="dropdown-item" href="report-employee.php">*****</a>
           </div>
         </li>
@@ -187,13 +187,13 @@ $pdo = db_connect();
                 <tbody>
                   <tr>
                     <td class="m-0 p-0">
-                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][app_time]" value="<?=htmlspecialchars(substr($row['app_time'],0,5),ENT_QUOTES)?>">
+                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][app_time]" value="<?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?>">
                     </td>
                     <!--申請時間-->
 
 
                     <td class="m-0 p-0">
-                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][result_time]" value="<?=htmlspecialchars(substr($row['result_time'],0,5),ENT_QUOTES)?>">
+                      <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][result_time]" value="<?=htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES)?>">
                     </td>
                     <!--実施時間-->
                     <td class="m-0 p-1"><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
