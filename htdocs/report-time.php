@@ -198,7 +198,7 @@ $pdo = db_connect();
   </div>
 
   <?php
-  print_r($_POST);
+  // print_r($_POST);
 
   if(!empty($_POST['report_month'])){
     $sql_month = " AND zangyo_date LIKE '" . $_POST['report_month'] ."%'";
@@ -238,7 +238,7 @@ $pdo = db_connect();
   //print_r($array_report)
 
   ?>
-
+  <h4>残業実績</h4>
   <table class="table table-striped table-bordered table-condensed">
     <thead>
       <tr>
@@ -254,7 +254,7 @@ $pdo = db_connect();
         //各日の実施時間を配列にいれる
 
         $sql_date_jisseki_start = "AND zangyo.zangyo_date >= '" . $array_report[$j]["day"] . " 00:00:00' ";
-        $sql_date_jisseki_end = "AND zangyo.zangyo_date <= '" . $array_report[$j]["day"] . " 23:59:59' ";
+        $sql_date_end = "AND zangyo.zangyo_date <= '" . $array_report[$j]["day"] . " 23:59:59' ";
 
         try{
           $sql_report_jisseki="SELECT sec_to_time(sum(time_to_sec(IFNULL(zangyo.result_time,'00:00:00'))))
@@ -266,7 +266,7 @@ $pdo = db_connect();
           . $sql_department
           . $sql_group
           . $sql_date_jisseki_start
-          . $sql_date_jisseki_end
+          . $sql_date_end
           . "ORDER BY zangyo_date DESC";
           $stmh_report_jisseki=$pdo->prepare($sql_report_jisseki);
           $stmh_report_jisseki->execute();
@@ -287,6 +287,37 @@ $pdo = db_connect();
 
         //月間累計を配列にいれる
 
+        $sql_date_sum_start = "AND zangyo.zangyo_date >= '" . $first_date . " 00:00:00' ";
+        $sql_date_end = "AND zangyo.zangyo_date <= '" . $array_report[$j]["day"] . " 23:59:59' ";
+
+        try{
+          $sql_report_sum="SELECT sec_to_time(sum(time_to_sec(IFNULL(zangyo.result_time,'00:00:00'))))
+          AS report_sum
+          from (((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
+          LEFT OUTER JOIN department ON employee.department_id = department.department_id)
+          LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+          WHERE 1 "
+          . $sql_department
+          . $sql_group
+          . $sql_date_sum_start
+          . $sql_date_end
+          . "ORDER BY zangyo_date DESC";
+          $stmh_report_sum=$pdo->prepare($sql_report_sum);
+          $stmh_report_sum->execute();
+          $count_report_sum=$stmh_report_sum->rowCount();
+        }catch(PDOException $Exception_report_sum){
+          print"エラー：".$Exception_report_sum->getMessage();
+        }
+        if($count_report_sum>0){
+          while($row_report_sum=$stmh_report_sum->fetch(PDO::FETCH_ASSOC)){
+            if($row_report_sum['report_sum'] == ""){
+              $array_report[$j]["sum"] = "00:00:00";
+            }else{
+              $array_report[$j]["sum"] = htmlspecialchars($row_report_sum['report_sum'],ENT_QUOTES);
+            }
+          }
+        }
+
 
         ?>
         <tr>
@@ -305,7 +336,7 @@ $pdo = db_connect();
           </td>
           <td>
             <?php
-            //echo htmlspecialchars(substr($array_report[$j]['sum'],0,-3),ENT_QUOTES);
+            echo htmlspecialchars(substr($array_report[$j]['sum'],0,-3),ENT_QUOTES);
             ?>
           </td><!--月間累計-->
         </tr>
@@ -315,7 +346,13 @@ $pdo = db_connect();
     </tbody>
   </table>
 </main>
-
+<?php
+// for($l = 0 ; $l < $num_date ; $l++){
+//   echo "'";
+//   echo (int)substr($array_report[$l]["jisseki"],0,-6) + (int)substr($array_report[$l]["jisseki"],-5,-3)/60;
+//   echo "',";
+// }
+?>
 <footer class="footer">
   <div class="container text-center">
     <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
@@ -374,39 +411,64 @@ window.onload = function() {
 <script>
 // とある4週間分のデータログ
 var barChartData = {
-  labels: ['8/26','8/27','8/28','8/29','8/30','8/31','9/1',
-  '9/2','9/3','9/4','9/5','9/6','9/7','9/8',
-  '9/9','9/10','9/11','9/12','9/13','9/14',
-  '9/15','9/16','9/17','9/18','9/19','9/20','9/21','9/22'
-],
-datasets: [
-  {
-    type: 'line',
-    label: 'sample-line',
-    data: ['0.155','0.118','0.121','0.068','0.083','0.060','0.067',
-    '0.121','0.121','0.150','0.118','0.097','0.078','0.127',
-    '0.155','0.140','0.101','0.140','0.041','0.093','0.189',
-    '0.146','0.134','0.127','0.116','0.111','0.125','0.116'
+  labels: [
+    <?php
+    for($k = 0 ; $k < $num_date ; $k++){
+      echo "'";
+      echo date('d',strtotime($array_report[$k]["day"]));
+      echo "',";
+    }
+    ?>
+    //   '8/26','8/27','8/28','8/29','8/30','8/31','9/1',
+    // '9/2','9/3','9/4','9/5','9/6','9/7','9/8',
+    // '9/9','9/10','9/11','9/12','9/13','9/14',
+    // '9/15','9/16','9/17','9/18','9/19','9/20','9/21','9/22'
   ],
-  borderColor : "rgba(254,97,132,0.8)",
-  pointBackgroundColor    : "rgba(254,97,132,0.8)",
-  fill: false,
-  yAxisID: "y-axis-1",// 追加
-  lineTension: 0,
-},
-{
-  type: 'bar',
-  label: 'sample-bar',
-  data: ['0.3','0.1','0.1','0.3','0.4','0.2','0.0',
-  '0.2','0.3','0.11','0.5','0.2','0.5','0.4',
-  '0.0','0.3','0.7','0.3','0.6','0.4','0.9',
-  '0.7','0.4','0.8','0.7','0.4','0.7','0.8'
-],
-borderColor : "rgba(54,164,235,0.8)",
-backgroundColor : "rgba(54,164,235,0.5)",
-yAxisID: "y-axis-2",
-},
-],
+  datasets: [
+    {
+      type: 'bar',
+      label: '実施時間',
+      data: [
+        <?php
+        for($l = 0 ; $l < $num_date ; $l++){
+          echo "'";
+          echo (int)substr($array_report[$l]["jisseki"],0,-6) + (int)substr($array_report[$l]["jisseki"],-5,-3)/60;
+          echo "',";
+        }
+        ?>
+        //   '0.3','0.1','0.1','0.3','0.4','0.2','0.0',
+        // '0.2','0.3','0.11','0.5','0.2','0.5','0.4',
+        // '0.0','0.3','0.7','0.3','0.6','0.4','0.9',
+        // '0.7','0.4','0.8','0.7','0.4','0.7','0.8'
+      ],
+      borderColor : "rgba(54,164,235,0.8)",
+      backgroundColor : "rgba(54,164,235,0.5)",
+      yAxisID: "y-axis-1",
+    },
+    {
+      type: 'line',
+      label: '累計時間',
+      data: [
+        <?php
+        for($l = 0 ; $l < $num_date ; $l++){
+          echo "'";
+          echo (int)substr($array_report[$l]["sum"],0,-6) + (int)substr($array_report[$l]["sum"],-5,-3)/60;
+          echo "',";
+        }
+        ?>
+        //   '0.155','0.118','0.121','0.068','0.083','0.060','0.067',
+        // '0.121','0.121','0.150','0.118','0.097','0.078','0.127',
+        // '0.155','0.140','0.101','0.140','0.041','0.093','0.189',
+        // '0.146','0.134','0.127','0.116','0.111','0.125','0.116'
+      ],
+      borderColor : "rgba(254,97,132,0.8)",
+      pointBackgroundColor    : "rgba(254,97,132,0.8)",
+      fill: false,
+      yAxisID: "y-axis-2",// 追加
+      lineTension: 0,
+    },
+
+  ],
 };
 </script>
 
@@ -418,23 +480,24 @@ var complexChartOption = {
       id: "y-axis-1",
       type: "linear",
       position: "left",
-      ticks: {
-        max: 0.2,
-        min: 0,
-        stepSize: 0.1
-      },
-    }, {
-      id: "y-axis-2",
-      type: "linear",
-      position: "right",
-      ticks: {
-        max: 1.5,
-        min: 0,
-        stepSize: .5
-      },
+      // ticks: {
+      //   max: 1.5,
+      //   min: 0,
+      //   stepSize: .5
+      // },
       gridLines: {
         drawOnChartArea: false,
       },
+    },{
+      id: "y-axis-2",
+      type: "linear",
+      position: "right",
+
+      // ticks: {
+      //   max: 0.2,
+      //   min: 0,
+      //   stepSize: 0.1
+      // },
     }],
   }
 };
