@@ -74,7 +74,7 @@ $pdo = db_connect();
   <main role="main" class="container-fluid">
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1>残業実績集計(年間/部署)</h1>
+      <h1>残業実績集計(年間/個人)</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
           <button class="btn btn-sm btn-outline-secondary">Share</button>
@@ -99,14 +99,15 @@ $pdo = db_connect();
       <table class="table table-striped table-bordered table-condensed">
         <thead>
           <tr>
-            <th style="width: 200px" class="text-center">対象年</th>
-            <th style="width: 250px" class="text-center">部署</th>
-            <th style="width: 250px" class="text-center">グループ</th>
+						<th style="width: 200px" class="text-center">対象年</th>
+            <th style="width: 250px" class="text-center">名前</th>
+						<th style="width: 250px" class="text-center">名前を部署で絞り込み</th>
+						<th style="width: 250px" class="text-center">名前をグループで絞り込み</th>
           </tr>
         </thead>
         <tbody>
 
-          <form name="form1" method="post" action="report-year.php">
+          <form name="form1" method="post" action="report-personal-year.php">
             <tr>
               <td class="m-0 p-0">
                 <div id="year-month">
@@ -120,7 +121,56 @@ $pdo = db_connect();
                   </div>
                 </div>
               </td>
-              <td class="m-0 p-0">
+							<td class="m-0 p-0">
+                <select class="form-control" name="report_employee_id">
+                  <option value="" <?php if(empty($_POST['report_employee_id'])){echo "selected";} ?>>(指定なし)</option>
+                  <?php
+
+									if(!empty($_POST['report_department_id'])){
+								    $sql_department = " AND employee.department_id = '" . $_POST['report_department_id'] ."' ";
+								  }else{
+								    $sql_department = "";
+								  }
+
+								  if(!empty($_POST['report_group_id'])){
+								    $sql_group = " AND employee.group_id = '" . $_POST['report_group_id'] ."' ";
+								  }else{
+								    $sql_group = "";
+								  }
+
+                  try{
+                    $sql="SELECT * from employee
+										WHERE 1 "
+										.$sql_department
+										.$sql_group;
+
+                    $stmh=$pdo->prepare($sql);
+                    $stmh->execute();
+                    $count=$stmh->rowCount();
+                  }catch(PDOException $Exception){
+                    print"エラー：".$Exception->getMessage();
+                  }
+                  if($count>0){
+                    while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+                      ?>
+                      <option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>"
+                        <?php
+                        if(!empty($_POST['report_employee_id'])){
+                          if($_POST['report_employee_id'] == htmlspecialchars($row['employee_id'],ENT_QUOTES)){
+                            echo "selected";
+                          }
+                        }
+                        ?>
+                        >
+                        <?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?>
+                      </option>
+                      <?php
+                    }
+                  }
+                  ?>
+                </select>
+              </td>
+							<td class="m-0 p-0">
                 <select class="form-control" name="report_department_id">
                   <option value="" <?php if(empty($_POST['report_department_id'])){echo "selected";} ?>>(指定なし)</option>
                   <?php
@@ -144,9 +194,7 @@ $pdo = db_connect();
                         }
                         ?>
                         >
-                        <?php
-                        echo htmlspecialchars($row['department_name'],ENT_QUOTES);
-                        ?>
+                        <?=htmlspecialchars($row['department_name'],ENT_QUOTES)?>
                       </option>
                       <?php
                     }
@@ -184,9 +232,7 @@ $pdo = db_connect();
                       }
                       ?>
                       >
-                      <?php
-                      echo htmlspecialchars($row['group_name'],ENT_QUOTES);
-                      ?>
+                      <?=htmlspecialchars($row['group_name'],ENT_QUOTES)?>
                     </option>
                     <?php
                   }
@@ -211,16 +257,10 @@ $pdo = db_connect();
   //   $sql_year = "";
   // }
 
-  if(!empty($_POST['report_department_id'])){
-    $sql_department = " AND department.department_id = '" . $_POST['report_department_id'] ."' ";
+	if(!empty($_POST['report_employee_id'])){
+    $sql_employee = " AND employee.employee_id = '" . $_POST['report_employee_id'] ."' ";
   }else{
-    $sql_department = "";
-  }
-
-  if(!empty($_POST['report_group_id'])){
-    $sql_group = " AND work_group.group_id = '" . $_POST['report_group_id'] ."' ";
-  }else{
-    $sql_group = "";
+    $sql_employee = " AND 0 ";
   }
 
   if(!empty($_POST['report_year'])){
@@ -286,12 +326,9 @@ $pdo = db_connect();
           try{
             $sql_report_jisseki="SELECT sec_to_time(sum(time_to_sec(IFNULL(zangyo.result_time,'00:00:00'))))
             AS report_year
-            from (((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
-            LEFT OUTER JOIN department ON employee.department_id = department.department_id)
-            LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+            from (zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
             WHERE 1 "
-            . $sql_department
-            . $sql_group
+            . $sql_employee
             . $sql_year_start
             . $sql_year_end
             . "ORDER BY zangyo_date DESC";
@@ -324,8 +361,7 @@ $pdo = db_connect();
             LEFT OUTER JOIN department ON employee.department_id = department.department_id)
             LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
             WHERE 1 "
-            . $sql_department
-            . $sql_group
+            . $sql_employee
             . $sql_year_sum_start
             . $sql_year_sum_end
             . "ORDER BY zangyo_date DESC";

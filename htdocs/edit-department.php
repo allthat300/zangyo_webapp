@@ -61,9 +61,10 @@ $pdo = db_connect();
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">レポート</a>
           <div class="dropdown-menu" aria-labelledby="dropdown04">
-            <a class="dropdown-item" href="report-month.php">月間</a>
-            <a class="dropdown-item" href="report-year.php">年間</a>
-            <a class="dropdown-item" href="report-employee.php">*****</a>
+						<a class="dropdown-item" href="report-month.php">月間(部署)</a>
+            <a class="dropdown-item" href="report-year.php">年間(部署)</a>
+            <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
+						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
           </div>
         </li>
       </ul>

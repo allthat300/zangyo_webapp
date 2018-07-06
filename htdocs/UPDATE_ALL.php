@@ -34,14 +34,16 @@ foreach($_POST['zangyo'] as $id1 => $value1)
     remarks = :remarks
     WHERE id = :id";
 
-    if($value1['case_id'] == 1)
-    {
+    if($value1['case_id'] == 1){
       $zangyo_date = $value1['zangyo_date']." 18:00:00";
-    }
-    else
-    {
+    }else{
       $zangyo_date = $value1['zangyo_date']." 00:00:00";
     }
+
+		if($value1['result_time'] == ""){
+			$value1['result_time'] = null;
+		}
+
 
     $stmh = $pdo->prepare($sql);  //prepareメソッドで各テーブル名(date,case_id...)に対しパラメータ(:date,:case_id...)を与える。
     $stmh->bindValue(':zangyo_date',$zangyo_date,PDO::PARAM_STR);

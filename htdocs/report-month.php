@@ -61,9 +61,10 @@ $pdo = db_connect();
         <li class="nav-item dropdown active">
           <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">レポート</a>
           <div class="dropdown-menu" aria-labelledby="dropdown04">
-            <a class="dropdown-item" href="report-month.php">月間</a>
-            <a class="dropdown-item" href="report-year.php">年間</a>
-            <a class="dropdown-item" href="report-employee.php">*****</a>
+						<a class="dropdown-item" href="report-month.php">月間(部署)</a>
+            <a class="dropdown-item" href="report-year.php">年間(部署)</a>
+            <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
+						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
           </div>
         </li>
       </ul>
@@ -73,7 +74,7 @@ $pdo = db_connect();
   <main role="main" class="container-fluid">
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1>残業実績集計(月間)</h1>
+      <h1>残業実績集計(月間/部署)</h1>
       <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
           <button class="btn btn-sm btn-outline-secondary">Share</button>
