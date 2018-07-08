@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -73,7 +74,7 @@ $pdo = db_connect();
 
 <main role="main" class="container-fluid">
 
-      <h1 class="h1 my-3">部長申請・承認</h1>
+      <h1 class="h1 my-3">上長申請・承認</h1>
       <h4>検索条件</h4>
 
       <table class="table table-striped table-bordered table-condensed">
@@ -84,17 +85,24 @@ $pdo = db_connect();
             <th style="width: 200px" class="text-center">名前</th>
             <th style="width: 250px" class="text-center">部署</th>
             <th style="width: 250px" class="text-center">グループ</th>
+						<th style="width: 100px" class="text-center">確認</th>
           </tr>
         </thead>
         <tbody>
 
-          <form name="form1" method="post" action="#">
+          <form name="form1" method="post" action="approval.php">
             <tr>
               <td class="m-0 p-0">
                 <div id="datepicker-default">
                   <div class="form-inline">
                     <div class="input-group date w-100">
-                      <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off" value="<?php if(!empty($_POST['search_start_date'])){echo $_POST['search_start_date'];}?>">
+                      <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off" value="<?php
+											 if(!empty($_POST['search_start_date'])){
+												 echo $_POST['search_start_date'];
+											 }else{
+												 echo date('Y-m-d', strtotime('-1 day'));
+											 }
+											 ?>">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
@@ -106,7 +114,13 @@ $pdo = db_connect();
                 <div id="datepicker-default">
                   <div class="form-inline">
                     <div class="input-group date w-100">
-                      <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off" value="<?php if(!empty($_POST['search_end_date'])){echo $_POST['search_end_date'];}?>">
+                      <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off" value="<?php
+											 if(!empty($_POST['search_end_date'])){
+												 echo $_POST['search_end_date'];
+											 }else{
+												 echo date('Y-m-d', strtotime('+1 day'));
+											 }
+											 ?>">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
@@ -179,13 +193,7 @@ $pdo = db_connect();
                 </select>
               </td>
               <td class="m-0 p-0">
-                <select class="form-control" name="search_group_id" value="
-                <?php
-                if(!empty($_POST['search_group_id'])){
-                  echo $_POST['search_group_id'];
-                }
-                ?>
-                ">
+                <select class="form-control" name="search_group_id">
                 <option value="">(指定なし)</option>
                 <?php
                 try{
@@ -216,6 +224,13 @@ $pdo = db_connect();
                 ?>
               </select>
             </td>
+						<td class="m-0 p-0">
+							<select class="form-control" name="search_boss_check">
+							<option value="0" <?php	if(!empty($_POST['search_boss_check'])){if($_POST['search_boss_check'] == '0'){echo "selected";}}?>>(指定なし)</option>
+							<option value="1" <?php	if(!empty($_POST['search_boss_check'])){if($_POST['search_boss_check'] == '1'){echo "selected";}}?>>済</option>
+							<option value="2" <?php	if(!empty($_POST['search_boss_check'])){if($_POST['search_boss_check'] == '2'){echo "selected";}}?>>未</option>
+						</select>
+					</td>
             </tr>
 
           </tbody>
@@ -223,19 +238,18 @@ $pdo = db_connect();
         <button class="btn btn-lg btn-primary" type="submit" name='action' value='search'>検索</button>
       </form>
       </div>
-      <hr>
 
       <?php
       if(!empty($_POST['search_start_date'])){
       $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
       }else{
-      $sql_search_start_date = "";
+      $sql_search_start_date = " AND zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'";
       }
 
       if(!empty($_POST['search_end_date'])){
       $sql_search_end_date = " AND zangyo_date <= '" . $_POST['search_end_date'] ." 23:59:59'";
       }else{
-      $sql_search_end_date = "";
+      $sql_search_end_date = " AND zangyo_date <= '" . date('Y-m-d', strtotime('+1 day')) ." 23:59:59'";
       }
 
       if(!empty($_POST['search_employee_id'])){
@@ -255,7 +269,20 @@ $pdo = db_connect();
       }else{
       $sql_search_group_id = "";
       }
-      $sql_where = " WHERE 1 ". $sql_search_start_date . $sql_search_end_date . $sql_search_employee_id . $sql_search_department_id . $sql_search_group_id;
+
+			if(!empty($_POST['search_boss_check'])){
+				if($_POST['search_boss_check'] == "1"){
+					$sql_search_boss_check = " AND zangyo.boss_check = 1";
+				}elseif($_POST['search_boss_check'] == "2"){
+					$sql_search_boss_check = " AND zangyo.boss_check = 0";
+				}else{
+					$sql_search_boss_check = "";
+				}
+      }else{
+				$sql_search_boss_check = "";
+      }
+
+      $sql_where = " WHERE 1 ". $sql_search_start_date . $sql_search_end_date . $sql_search_employee_id . $sql_search_department_id . $sql_search_group_id . $sql_search_boss_check;
 
       try{
       $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,employee.department_id,department.department_name,employee.group_id,work_group.group_name
@@ -279,11 +306,11 @@ $pdo = db_connect();
         <button class="btn btn-lg btn-primary" type="submit" name='action' value='getURL'>URL生成</button>
         <hr>
 
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered table-condensed table-responsive text-center" style="table-layout:fixed;">
+
+          <table class="table table-striped table-bordered table-condensed table-responsive text-center">
             <thead>
               <tr>
-                <th style="width:50px;"></th>
+                <th></th>
                 <th style="width:150px;">実施日</th>
                 <th style="width:100px;">種別</th>
                 <th style="width:150px;">名前</th>
@@ -328,13 +355,16 @@ $pdo = db_connect();
                         echo htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES);
                       }
                       ?></td>
-                      <td><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                      <td><!--年間累計-->
-                        <?php
-                        require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                        require("../php_libs/SUM_YEAR.php");
-                        ?>
-                      </td>
+
+                      <?php require("../php_libs/SUM_MONTH.php"); ?>
+                      <td class="<?php require("../php_libs/ALERT_MONTH.php"); ?>"><?= $sum_month; ?></td><!--月間累計-->
+
+                      <?php
+                      require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                      require("../php_libs/SUM_YEAR.php");
+                       ?>
+                      <td class="<?php require("../php_libs/ALERT_YEAR.php"); ?>"><?= $sum_year; ?></td><!--年間累計-->
+
                       <td>
                         <?php
                         if(htmlspecialchars($row['boss_check'],ENT_QUOTES) == "1")
@@ -355,7 +385,7 @@ $pdo = db_connect();
                 ?>
               </tbody>
             </table>
-          </div>
+
           <hr>
           <form method="get" action="zangyo_check.php">
             <button class="btn btn-lg btn-primary" type="submit" name='action' value='getURL'>URL生成</button>

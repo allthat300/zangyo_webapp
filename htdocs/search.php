@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -87,13 +88,19 @@ $pdo = db_connect();
       </thead>
       <tbody>
 
-        <form name="form1" method="post" action="#">
+        <form name="form1" method="post" action="search.php">
           <tr>
             <td class="m-0 p-0">
               <div id="datepicker-default">
                 <div class="form-inline">
                   <div class="input-group date w-100">
-                    <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off" value="<?php if(!empty($_POST['search_start_date'])){echo $_POST['search_start_date'];}?>">
+                    <input type="text" class="form-control" name="search_start_date" autocomplete="off" value="<?php
+										if(!empty($_POST['search_start_date'])){
+											echo $_POST['search_start_date'];
+										}else{
+											echo date('Y-m-d', strtotime('-1 day'));
+										}
+										?>">
                     <div class="input-group-addon">
                       <i class="fa fa-calendar"></i>
                     </div>
@@ -105,7 +112,13 @@ $pdo = db_connect();
               <div id="datepicker-default">
                 <div class="form-inline">
                   <div class="input-group date w-100">
-                    <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off" value="<?php if(!empty($_POST['search_end_date'])){echo $_POST['search_end_date'];}?>">
+                    <input type="text" class="form-control" name="search_end_date" autocomplete="off" value="<?php
+										 if(!empty($_POST['search_end_date'])){
+											 echo $_POST['search_end_date'];
+										 }else{
+											 echo date('Y-m-d', strtotime('+1 day'));
+										 }
+										 ?>">
                     <div class="input-group-addon">
                       <i class="fa fa-calendar"></i>
                     </div>
@@ -227,13 +240,13 @@ $pdo = db_connect();
   if(!empty($_POST['search_start_date'])){
     $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
   }else{
-    $sql_search_start_date = "";
+    $sql_search_start_date = " AND zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'";
   }
 
   if(!empty($_POST['search_end_date'])){
     $sql_search_end_date = " AND zangyo_date <= '" . $_POST['search_end_date'] ." 23:59:59'";
   }else{
-    $sql_search_end_date = "";
+    $sql_search_end_date = " AND zangyo_date <= '" . date('Y-m-d', strtotime('+1 day')) ." 23:59:59'";
   }
 
   if(!empty($_POST['search_employee_id'])){
@@ -327,13 +340,14 @@ $pdo = db_connect();
                     echo htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES);
                   }
                   ?></td>
-                  <td><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                  <td><!--年間累計-->
-                    <?php
-                    require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                    require("../php_libs/SUM_YEAR.php");
-                    ?>
-                  </td>
+                  <?php require("../php_libs/SUM_MONTH.php"); ?>
+                  <td class="<?php require("../php_libs/ALERT_MONTH.php"); ?>"><?= $sum_month; ?></td><!--月間累計-->
+
+                  <?php
+                  require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                  require("../php_libs/SUM_YEAR.php");
+                   ?>
+                  <td class="<?php require("../php_libs/ALERT_YEAR.php"); ?>"><?= $sum_year; ?></td><!--年間累計-->
                   <td>
                     <?php
                     if(htmlspecialchars($row['boss_check'],ENT_QUOTES) == "1")

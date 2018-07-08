@@ -1,3 +1,4 @@
+
 <?php
 try{
   $sql_sum_month="SELECT sec_to_time(sum(time_to_sec(IFNULL(result_time,'00:00:00')))) AS sum_month_time from zangyo
@@ -15,7 +16,7 @@ if($count_sum_month=0){
   echo "0";
 }else{
   while($row_sum_month=$stmh_sum_month->fetch(PDO::FETCH_ASSOC)){
-    echo htmlspecialchars(substr($row_sum_month['sum_month_time'],0,5),ENT_QUOTES);
+    $sum_month = htmlspecialchars(substr($row_sum_month['sum_month_time'],0,-3),ENT_QUOTES);
   }
 }
 ?>

@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-month.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -75,7 +76,7 @@ $pdo = db_connect();
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1>残業実績集計(月間/部署)</h1>
-      <div class="btn-toolbar mb-2 mb-md-0">
+      <!-- <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
           <button class="btn btn-sm btn-outline-secondary">Share</button>
           <button class="btn btn-sm btn-outline-secondary">Export</button>
@@ -84,11 +85,15 @@ $pdo = db_connect();
           <span data-feather="calendar"></span>
           This week
         </button>
-      </div>
+      </div> -->
     </div>
     <div class="container">
 
-
+			<?php
+			$graph_title_time= "";
+			$graph_title_department="";
+			$graph_title_group="";
+			?>
       <canvas class="my-4 w-100 mx-auto" id="myChart" width="900" height="380"></canvas>
 
 
@@ -112,7 +117,15 @@ $pdo = db_connect();
                 <div id="year-month">
                   <div class="form-inline">
                     <div class="input-group date w-100">
-                      <input type="text" class="form-control" placeholder="ex)2018-04" name="report_month" autocomplete="off" value="<?php if(!empty($_POST['report_month'])){echo $_POST['report_month'];}?>">
+                      <input type="text" class="form-control" placeholder="ex)2018-04" name="report_month" autocomplete="off" value="<?php
+											 if(!empty($_POST['report_month'])){
+												 echo $_POST['report_month'];
+												 $graph_title_time = substr($_POST['report_month'],0,-3) . "年" . substr($_POST['report_month'],-2) . "月度";
+											 }else{
+												 echo date('Y-m');
+												 $graph_title_time = date('Y') . "年" . date('m') . "月度";
+											 }
+											 ?>">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
@@ -122,7 +135,7 @@ $pdo = db_connect();
               </td>
               <td class="m-0 p-0">
                 <select class="form-control" name="report_department_id">
-                  <option value="" <?php if(empty($_POST['report_department_id'])){echo "selected";} ?>>(指定なし)</option>
+                  <option value="" <?php if(empty($_POST['report_department_id'])){echo "selected";$graph_title_department = "すべての部署";} ?>>(全ての部署)</option>
                   <?php
                   try{
                     $sql="SELECT * from department";
@@ -140,6 +153,7 @@ $pdo = db_connect();
                         if(!empty($_POST['report_department_id'])){
                           if($_POST['report_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){
                             echo "selected";
+														$graph_title_department = htmlspecialchars($row['department_name'],ENT_QUOTES);
                           }
                         }
                         ?>
@@ -160,7 +174,7 @@ $pdo = db_connect();
                 }
                 ?>
                 ">
-                <option value="">(指定なし)</option>
+                <option value="" <?php if(empty($_POST['report_group_id'])){echo "selected"; $graph_title_group = "全てのグループ";} ?>>(全てのグループ)</option>
                 <?php
                 try{
                   $sql="SELECT * from work_group";
@@ -178,6 +192,7 @@ $pdo = db_connect();
                       if(!empty($_POST['report_group_id'])){
                         if($_POST['report_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){
                           echo "selected";
+													$graph_title_group = htmlspecialchars($row['group_name'],ENT_QUOTES);
                         }
                       }
                       ?>
@@ -347,13 +362,7 @@ $pdo = db_connect();
     </tbody>
   </table>
 </main>
-<?php
-// for($l = 0 ; $l < $num_date ; $l++){
-//   echo "'";
-//   echo (int)substr($array_report[$l]["jisseki"],0,-6) + (int)substr($array_report[$l]["jisseki"],-5,-3)/60;
-//   echo "',";
-// }
-?>
+
 <footer class="footer">
   <div class="container text-center">
     <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
@@ -483,7 +492,7 @@ var complexChartOption = {
   title: {                           //タイトル設定
     display: true,                 //表示設定
     fontSize: 20,                  //フォントサイズ
-    text: '月間実績'                //ラベル
+    text: '月間実績 ( <?php echo $graph_title_time . " " . $graph_title_department . " " . $graph_title_group ;?>)'                //ラベル
   },
   scales: {
     yAxes: [{
@@ -527,7 +536,7 @@ var complexChartOption = {
       scaleLabel: {                 //軸ラベル設定
         display: true,             //表示設定
         labelString:
-        '<?=htmlspecialchars(substr($array_report[1]['day'],0,4),ENT_QUOTES)?>年<?=htmlspecialchars(substr($array_report[1]['day'],5,2),ENT_QUOTES)?>月度',  //ラベル
+        '<?=$graph_title_time?>',  //ラベル
         fontSize: 18               //フォントサイズ
       },
       ticks: {

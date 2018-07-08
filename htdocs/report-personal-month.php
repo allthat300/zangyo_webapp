@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-month.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -75,7 +76,7 @@ $pdo = db_connect();
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1>残業実績集計(月間/個人)</h1>
-      <div class="btn-toolbar mb-2 mb-md-0">
+      <!-- <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
           <button class="btn btn-sm btn-outline-secondary">Share</button>
           <button class="btn btn-sm btn-outline-secondary">Export</button>
@@ -84,7 +85,7 @@ $pdo = db_connect();
           <span data-feather="calendar"></span>
           This week
         </button>
-      </div>
+      </div> -->
     </div>
     <div class="container">
 
@@ -113,7 +114,13 @@ $pdo = db_connect();
                 <div id="year-month">
                   <div class="form-inline">
                     <div class="input-group date w-100">
-                      <input type="text" class="form-control" placeholder="ex)2018-04" name="report_month" autocomplete="off" value="<?php if(!empty($_POST['report_month'])){echo $_POST['report_month'];}?>">
+                      <input type="text" class="form-control" placeholder="ex)2018-04" name="report_month" autocomplete="off" value="<?php
+											if(!empty($_POST['report_month'])){
+												echo $_POST['report_month'];
+											}else{
+												echo date('Y-m');
+											}
+											?>">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
@@ -385,13 +392,7 @@ $pdo = db_connect();
     </tbody>
   </table>
 </main>
-<?php
-// for($l = 0 ; $l < $num_date ; $l++){
-//   echo "'";
-//   echo (int)substr($array_report[$l]["jisseki"],0,-6) + (int)substr($array_report[$l]["jisseki"],-5,-3)/60;
-//   echo "',";
-// }
-?>
+
 <footer class="footer">
   <div class="container text-center">
     <span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>

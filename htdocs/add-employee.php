@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
           </div>
         </li>
       </ul>

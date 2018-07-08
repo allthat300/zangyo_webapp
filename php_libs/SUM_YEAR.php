@@ -15,6 +15,6 @@ if($count_sum_month=0){
   echo "0";
 }else{
   while($row_sum_month=$stmh_sum_month->fetch(PDO::FETCH_ASSOC)){
-    echo htmlspecialchars(substr($row_sum_month['sum_year_time'],0,5),ENT_QUOTES);
+    $sum_year = htmlspecialchars(substr($row_sum_month['sum_year_time'],0,-3),ENT_QUOTES);
   }
 }

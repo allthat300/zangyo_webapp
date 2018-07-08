@@ -20,7 +20,7 @@ foreach($_POST['id'] as $check_id)
       print "エラー：".$Exception->getMessage();
     }
 }
-header('Location: search.php', true, 301); //searchにリダイレクト
+header('Location: approval.php', true, 301); //searchにリダイレクト
 
 // すべての出力を終了
 exit;

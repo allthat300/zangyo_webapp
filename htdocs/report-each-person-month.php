@@ -1,0 +1,502 @@
+<?php
+require_once("../php_libs/MYDB.php");
+$pdo = db_connect();
+?>
+
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="/img/favicon.ico">
+
+	<title>残業管理</title>
+
+	<!-- Bootstrap core CSS -->
+	<link href="/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- Custom styles for this template -->
+	<!-- <link href="/dist/css/navbar-top-fixed.css" rel="stylesheet"> -->
+
+	<!-- Custom styles for this template -->
+	<link href="/dist/css/sticky-footer-navbar.css" rel="stylesheet">
+
+	<!-- for bootstrap-datepicker -->
+	<!-- <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet"> -->
+	<link rel="stylesheet" type="text/css" href="/dist/css/bootstrap-datepicker.min.css">
+
+</head>
+
+<body>
+
+	<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<a class="navbar-brand" href="index.php">残業管理</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item">
+					<a class="nav-link" href="index.php">申請</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="jisseki.php">実績入力</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="search.php">編集・削除</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="approval.php">承認</a>
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">設定</a>
+					<div class="dropdown-menu" aria-labelledby="dropdown04">
+						<a class="dropdown-item" href="add-employee.php">社員追加</a>
+						<a class="dropdown-item" href="edit-department.php">部署変更</a>
+						<a class="dropdown-item" href="#">*****</a>
+					</div>
+				</li>
+				<li class="nav-item dropdown active">
+					<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">レポート</a>
+					<div class="dropdown-menu" aria-labelledby="dropdown04">
+						<a class="dropdown-item" href="report-month.php">月間(部署)</a>
+						<a class="dropdown-item" href="report-year.php">年間(部署)</a>
+						<a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
+						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-month.php">個人別</a>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+	<main role="main" class="container-fluid">
+
+		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+			<h1>残業実績集計(月間/個人別)</h1>
+			<!-- <div class="btn-toolbar mb-2 mb-md-0">
+				<div class="btn-group mr-2">
+					<button class="btn btn-sm btn-outline-secondary">Share</button>
+					<button class="btn btn-sm btn-outline-secondary">Export</button>
+				</div>
+				<button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+					<span data-feather="calendar"></span>
+					This week
+				</button>
+			</div> -->
+		</div>
+		<div class="container">
+
+			<?php
+			$graph_title_time= "";
+			$graph_title_department="";
+			$graph_title_group="";
+			?>
+			<canvas class="my-4 w-100 mx-auto" id="myChart" width="900" height="380"></canvas>
+
+
+		</div>
+
+		<div class="border-top border-bottom py-2 my-2">
+			<h4>検索条件</h4>
+			<table class="table table-striped table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th style="width: 200px" class="text-center">対象月</th>
+						<th style="width: 250px" class="text-center">部署</th>
+						<th style="width: 250px" class="text-center">グループ</th>
+					</tr>
+				</thead>
+				<tbody>
+
+					<form name="form1" method="post" action="report-each-person-month.php">
+						<tr>
+							<td class="m-0 p-0">
+								<div id="year-month">
+									<div class="form-inline">
+										<div class="input-group date w-100">
+											<input type="text" class="form-control" placeholder="ex)2018-04" name="report_month" autocomplete="off" value="<?php
+											if(!empty($_POST['report_month'])){
+												echo $_POST['report_month'];
+												$graph_title_time = substr($_POST['report_month'],0,-3) . "年" . substr($_POST['report_month'],-2) . "月度";
+											}else{
+												echo date('Y-m');
+												$graph_title_time = date('Y') . "年" . date('m') . "月度";
+											}
+											?>">
+											<div class="input-group-addon">
+												<i class="fa fa-calendar"></i>
+											</div>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="m-0 p-0">
+								<select class="form-control" name="report_department_id">
+									<option value="" <?php if(empty($_POST['report_department_id'])){echo "selected";$graph_title_department = "すべての部署";} ?>>(全ての部署)</option>
+									<?php
+									try{
+										$sql="SELECT * from department";
+										$stmh=$pdo->prepare($sql);
+										$stmh->execute();
+										$count=$stmh->rowCount();
+									}catch(PDOException $Exception){
+										print"エラー：".$Exception->getMessage();
+									}
+									if($count>0){
+										while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+											?>
+											<option value="<?=htmlspecialchars($row['department_id'],ENT_QUOTES)?>"
+												<?php
+												if(!empty($_POST['report_department_id'])){
+													if($_POST['report_department_id'] == htmlspecialchars($row['department_id'],ENT_QUOTES)){
+														echo "selected";
+														$graph_title_department = htmlspecialchars($row['department_name'],ENT_QUOTES);
+													}
+												}
+												?>
+												>
+												<?=htmlspecialchars($row['department_name'],ENT_QUOTES)?>
+											</option>
+											<?php
+										}
+									}
+									?>
+								</select>
+							</td>
+							<td class="m-0 p-0">
+								<select class="form-control" name="report_group_id" value="
+								<?php
+								if(!empty($_POST['report_group_id'])){
+									echo $_POST['report_group_id'];
+								}
+								?>
+								">
+								<option value="" <?php if(empty($_POST['report_group_id'])){echo "selected"; $graph_title_group = "全てのグループ";} ?>>(全てのグループ)</option>
+								<?php
+								try{
+									$sql="SELECT * from work_group";
+									$stmh=$pdo->prepare($sql);
+									$stmh->execute();
+									$count=$stmh->rowCount();
+								}catch(PDOException $Exception){
+									print"エラー：".$Exception->getMessage();
+								}
+								if($count>0){
+									while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
+										?>
+										<option value="<?=htmlspecialchars($row['group_id'],ENT_QUOTES)?>"
+											<?php
+											if(!empty($_POST['report_group_id'])){
+												if($_POST['report_group_id'] == htmlspecialchars($row['group_id'],ENT_QUOTES)){
+													echo "selected";
+													$graph_title_group = htmlspecialchars($row['group_name'],ENT_QUOTES);
+												}
+											}
+											?>
+											>
+											<?=htmlspecialchars($row['group_name'],ENT_QUOTES)?>
+										</option>
+										<?php
+									}
+								}
+								?>
+							</select>
+						</td>
+					</tr>
+
+				</tbody>
+			</table>
+			<button class="btn btn-lg btn-primary" type="submit" name='action' value='report'>検索</button>
+		</form>
+	</div>
+
+	<?php
+	// print_r($_POST);
+
+	// if(!empty($_POST['report_month'])){
+	//   $sql_month = " AND zangyo_date LIKE '" . $_POST['report_month'] ."%'";
+	// }else{
+	//   $sql_month = "";
+	// }
+
+	if(!empty($_POST['report_department_id'])){
+		$sql_department = " AND employee.department_id = '" . $_POST['report_department_id'] ."' ";
+	}else{
+		$sql_department = "";
+	}
+
+	if(!empty($_POST['report_group_id'])){
+		$sql_group = " AND employee.group_id = '" . $_POST['report_group_id'] ."' ";
+	}else{
+		$sql_group = "";
+	}
+
+	if(!empty($_POST['report_month'])){
+		$first_date = date('Y-m-d', strtotime('first day of ' . $_POST['report_month']));
+	}else{
+		$first_date = date("Y-m-01");
+	}
+
+	if(!empty($_POST['report_month'])){
+		$last_date = date('Y-m-d', strtotime('last day of ' . $_POST['report_month']));
+	}else{
+		$last_date = date("Y-m-t");
+	}
+
+	$sql_term = " AND zangyo.zangyo_date >= '" . $first_date . " 00:00:00' " .
+	" AND zangyo.zangyo_date <= '" . $last_date . " 23:59:59' ";
+
+	$array_report[] = ["id" => "", "person" => "", "sum" => ""];
+
+	//print_r($array_report)
+
+	?>
+	<h4>残業実績</h4>
+	<table class="table table-striped table-bordered table-condensed">
+		<thead>
+			<tr>
+				<th class="text-center">名前</th>
+				<th class="text-center">月間累計</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+
+
+			//名前を配列にいれる
+			$num_person = 0;
+			try{
+				$sql_report_jisseki="SELECT * from employee
+				WHERE 1 "
+				. $sql_department
+				. $sql_group;
+
+				$stmh_report_jisseki=$pdo->prepare($sql_report_jisseki);
+				$stmh_report_jisseki->execute();
+				$count_num_person=$stmh_report_jisseki->rowCount();
+				$num_person = $count_num_person;
+			}catch(PDOException $Exception_report_jisseki){
+				print"エラー：".$Exception_report_jisseki->getMessage();
+			}
+
+
+
+			if($num_person>0){
+				$j = 0;
+				while($row_report_jisseki=$stmh_report_jisseki->fetch(PDO::FETCH_ASSOC)){
+					$array_report[$j]["id"] = $row_report_jisseki['employee_id'];
+					$array_report[$j]["person"] = $row_report_jisseki['employee_name'];
+					$j++;
+				}
+			}
+
+			for($k = 0 ; $k < (int)$num_person ; $k++){
+
+			//月間累計を配列にいれる
+
+				try{
+					$sql_report_sum="SELECT sec_to_time(sum(time_to_sec(IFNULL(zangyo.result_time,'00:00:00'))))
+					AS report_sum
+					from (zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
+					WHERE 1 "
+					. $sql_department
+					. $sql_group
+					. $sql_term
+					. "AND employee.employee_id = '" . $array_report[$k]['id'] . "' ";
+					$stmh_report_sum=$pdo->prepare($sql_report_sum);
+					$stmh_report_sum->execute();
+					$count_report_sum=$stmh_report_sum->rowCount();
+				}catch(PDOException $Exception_report_sum){
+					print"エラー：".$Exception_report_sum->getMessage();
+				}
+				if($count_report_sum>0){
+					while($row_report_sum=$stmh_report_sum->fetch(PDO::FETCH_ASSOC)){
+						if($row_report_sum['report_sum'] == ""){
+							$array_report[$k]["sum"] = "00:00:00";
+						}else{
+							$array_report[$k]["sum"] = htmlspecialchars($row_report_sum['report_sum'],ENT_QUOTES);
+						}
+					}
+				}
+
+
+				?>
+				<tr>
+					<td><!--実施日-->
+						<?php
+						echo htmlspecialchars($array_report[$k]['person']);
+						?>
+					</td>
+					<td>
+						<?php
+						echo htmlspecialchars(substr($array_report[$k]['sum'],0,-3),ENT_QUOTES);
+						?>
+					</td><!--月間累計-->
+				</tr>
+				<?php
+			}
+			?>
+		</tbody>
+	</table>
+</main>
+<?php
+// for($l = 0 ; $l < $num_date ; $l++){
+//   echo "'";
+//   echo (int)substr($array_report[$l]["jisseki"],0,-6) + (int)substr($array_report[$l]["jisseki"],-5,-3)/60;
+//   echo "',";
+// }
+?>
+<footer class="footer">
+	<div class="container text-center">
+		<span class="text-muted">残業管理システム 2018 Yusuke.Kishi</span>
+	</div>
+</footer>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="/dist/js/vendor/popper.min.js"></script>
+<script src="/dist/js/bootstrap.min.js"></script>
+
+<!-- Icons -->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
+feather.replace()
+</script>
+
+<!-- Datepicker -->
+<script type="text/javascript" src="/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript" src="/dist/js/bootstrap-datepicker.ja.js"></script>
+
+<script>
+$(function(){
+	//Default
+	$('#year-month .date').datepicker({
+		format: "yyyy-mm",
+		language: 'ja',
+		autoclose: true,
+		todayBtn: 'linked',
+		defaultDate: 0,
+		minViewMode: 'months'
+	});
+
+});
+</script>
+
+
+<!-- Graphs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+<script>
+window.onload = function() {
+	ctx = document.getElementById("myChart").getContext("2d");
+	window.myBar = new Chart(ctx, {
+		type: 'bar',
+		data: barChartData,
+		options: complexChartOption
+	});
+};
+</script>
+
+
+
+<script>
+// とある4週間分のデータログ
+var barChartData = {
+	labels: [
+		<?php
+		for($n = 0 ; $n < $num_person ; $n++){
+			echo "'";
+			echo $array_report[$n]["person"];
+			echo "',";
+		}
+		?>
+		//   '8/26','8/27','8/28','8/29','8/30','8/31','9/1',
+		// '9/2','9/3','9/4','9/5','9/6','9/7','9/8',
+		// '9/9','9/10','9/11','9/12','9/13','9/14',
+		// '9/15','9/16','9/17','9/18','9/19','9/20','9/21','9/22'
+	],
+	datasets: [
+		{
+			type: 'bar',
+			label: '累計時間',
+			data: [
+				<?php
+				for($l = 0 ; $l < $num_person ; $l++){
+					echo "'";
+					echo (int)substr($array_report[$l]["sum"],0,-6) + (int)substr($array_report[$l]["sum"],-5,-3)/60;
+					echo "',";
+				}
+				?>
+				//   '0.3','0.1','0.1','0.3','0.4','0.2','0.0',
+				// '0.2','0.3','0.11','0.5','0.2','0.5','0.4',
+				// '0.0','0.3','0.7','0.3','0.6','0.4','0.9',
+				// '0.7','0.4','0.8','0.7','0.4','0.7','0.8'
+			],
+			borderColor : "rgba(54,164,235,0.8)",
+			backgroundColor : "rgba(54,164,235,0.5)",
+			yAxisID: "y-axis-1",
+		},
+
+
+	],
+};
+</script>
+
+<script>
+var complexChartOption = {
+	responsive: true,
+	legend: {                          //凡例設定
+		display: true,                 //表示設定
+		fontSize:18
+	},
+	title: {                           //タイトル設定
+		display: true,                 //表示設定
+		fontSize: 20,                  //フォントサイズ
+		text: '月間実績 ( <?php echo $graph_title_time . " " . $graph_title_department . " " . $graph_title_group ;?>)'                //ラベル
+	},
+	scales: {
+		yAxes: [{
+			id: "y-axis-1",
+			type: "linear",
+			position: "left",
+			scaleLabel: {              //軸ラベル設定
+				display: true,          //表示設定
+				labelString: '累計時間',  //ラベル
+				fontSize: 18               //フォントサイズ
+			},
+			ticks: {
+				fontSize:18,
+				// max: 0.2,
+				min: 0,
+				// stepSize: 0.1
+			},
+			gridLines: {
+				drawOnChartArea: false,
+			},
+		}],
+		xAxes: [{                         //x軸設定
+			display: true,                //表示設定
+			// barPercentage: 0.4,           //棒グラフ幅
+			// categoryPercentage: 0.4,      //棒グラフ幅
+			scaleLabel: {                 //軸ラベル設定
+				display: true,             //表示設定
+				labelString:
+				'<?=$graph_title_time?>',  //ラベル
+				fontSize: 18               //フォントサイズ
+			},
+			ticks: {
+				fontSize: 18             //フォントサイズ
+			},
+		}],
+	}
+};
+</script>
+
+
+</body>
+</html>

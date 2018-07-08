@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -93,14 +94,13 @@ $pdo = db_connect();
             </tr>
           </thead>
           <tbody>
-            <form name="form1" method="post" action="INSERT.php">
+            <form method="post" action="INSERT.php">
               <tr>
                 <td class="m-0 p-0">
-                  <!-- <input type="text" class="form-control" placeholder="ex)2018-06-06" name="zangyo_date"> -->
                   <div id="datepicker-default">
                     <div class="form-inline">
                       <div class="input-group date">
-                        <input type="text" class="form-control" placeholder="ex)2018-06-06" name="zangyo_date" autocomplete="off">
+                        <input type="text" class="form-control" name="zangyo_date" autocomplete="off" value="<?=date('Y-m-d');?>">
                         <div class="input-group-addon">
                           <i class="fa fa-calendar"></i>
                         </div>
@@ -117,7 +117,9 @@ $pdo = db_connect();
                     <option value="5">代休</option>
                   </select>
                 </td>
-                <td class="m-0 p-0"><input type="text" class="form-control" placeholder="社員番号" name="employee_id"></td>
+                <td class="m-0 p-0">
+									<input type="text" class="form-control" placeholder="社員番号" name="employee_id" required>
+								</td>
                 <td class="m-0 p-0"><input type="text" class="form-control" placeholder="ex)1時間→1:00" name="zangyo_time"></td>
                 <td class="m-0 p-0"><input type="text" class="form-control" placeholder="EX-****" name="model_name"></td>
                 <td class="m-0 p-0"><input type="text" class="form-control" placeholder="内容" name="zangyo_detail"></td>
@@ -132,7 +134,6 @@ $pdo = db_connect();
       </form>
     </div>
     <hr>
-
 
     <h4>最新情報</h4>
     <table class="table table-striped table-bordered table-condensed text-center">
@@ -162,6 +163,7 @@ $pdo = db_connect();
             LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
             LEFT OUTER JOIN department ON employee.department_id = department.department_id)
             LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+						WHERE  zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'
             ORDER BY zangyo_date DESC
             ";
             //                        where id=(select max(id) from zangyo)";
@@ -194,13 +196,14 @@ $pdo = db_connect();
                   echo htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES);
                 }
                 ?></td>
-                <td><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                <td><!--年間累計-->
-                  <?php
-                  require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                  require("../php_libs/SUM_YEAR.php");
-                  ?>
-                </td>
+                <?php require("../php_libs/SUM_MONTH.php"); ?>
+                <td class="<?php require("../php_libs/ALERT_MONTH.php"); ?>"><?= $sum_month; ?></td><!--月間累計-->
+
+                <?php
+                require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                require("../php_libs/SUM_YEAR.php");
+                 ?>
+                <td class="<?php require("../php_libs/ALERT_YEAR.php"); ?>"><?= $sum_year; ?></td><!--年間累計-->
                 <td>
                   <?php
                   if(htmlspecialchars($row['boss_check'],ENT_QUOTES) == "1")
@@ -262,5 +265,29 @@ $pdo = db_connect();
 
   });
 </script>
+
+  <!-- Validate -->
+	<script>
+	// 無効なフィールドがある場合にフォーム送信を無効にするスターターJavaScriptの例
+	(function() {
+	  'use strict';
+
+	  window.addEventListener('load', function() {
+	    // カスタムブートストラップ検証スタイルを適用するすべてのフォームを取得
+	    var forms = document.getElementsByClassName('needs-validation');
+	    // ループして帰順を防ぐ
+	    var validation = Array.prototype.filter.call(forms, function(form) {
+	      form.addEventListener('submit', function(event) {
+	        if (form.checkValidity() === false) {
+	          event.preventDefault();
+	          event.stopPropagation();
+	        }
+	        form.classList.add('was-validated');
+	      }, false);
+	    });
+	  }, false);
+	})();
+	</script>
+
 </body>
 </html>

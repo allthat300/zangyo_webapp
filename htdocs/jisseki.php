@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -101,6 +102,7 @@ $pdo = db_connect();
               LEFT OUTER JOIN case_id ON zangyo.case_id = case_id.case_id)
               LEFT OUTER JOIN department ON employee.department_id = department.department_id)
               LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
+							WHERE result_time IS NULL
               ORDER BY zangyo_date DESC
               ";
               //                        where id=(select max(id) from zangyo)";
@@ -113,41 +115,42 @@ $pdo = db_connect();
             if($count>0){
               while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                 ?>
-                <td class="m-0 p-2"><!--実施日--><?php
+                <td class="align-middle m-0 p-0"><!--実施日--><?php
 
                 $datetime = new DateTime($row['zangyo_date']);
                 $week = array("日", "月", "火", "水", "木", "金", "土");
                 $w = (int)$datetime->format('w');
                 echo htmlspecialchars(substr($row['zangyo_date'],0,10),ENT_QUOTES) . " (" . $week[$w] . ")";
                 ?></td> <!--<?php /* <? PHPの式 ?>は<? echo PHPの式 ?>の省略形 */ ?>-->
-                <td class="m-0 p-2"><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td><!--種別-->
-                <td class="m-0 p-2"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td><!--名前-->
-                <td class="m-0 p-2"><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td><!--部署-->
-                <td class="m-0 p-2"><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td></td><!--グループ-->
-                <td class="m-0 p-2"><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td><!--申請時間-->
+                <td class="align-middle m-0 p-0"><?=htmlspecialchars($row['category'],ENT_QUOTES)?></td><!--種別-->
+                <td class="align-middle m-0 p-0"><?=htmlspecialchars($row['employee_name'],ENT_QUOTES)?></td><!--名前-->
+                <td class="align-middle m-0 p-0"><?=htmlspecialchars($row['department_name'],ENT_QUOTES)?></td><!--部署-->
+                <td class="align-middle m-0 p-0"><?=htmlspecialchars($row['group_name'],ENT_QUOTES)?></td></td><!--グループ-->
+                <td class="align-middle m-0 p-0"><?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?></td><!--申請時間-->
 
                 <!--実施時間-->
 
                 <?php
                 if(Is_null($row['result_time']) == TRUE){
                   ?>
-                  <td class="m-0 p-0">
+                  <td class="align-middle m-0 p-0">
                     <input type="text" class="form-control" placeholder="実施時間 ex)1:30" name="id[<?=$row['id']?>]">
                   </td>
                   <?php
                 }else {
                   ?>
-                  <td class="m-0 p-2"><?=htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES)?></td>
+                  <td class="align-middle m-0 p-2"><?=htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES)?></td>
                   <?php
                 }
                 ?>
-                <td class="m-0 p-2"><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                <td class="m-0 p-2"><!--年間累計-->
-                  <?php
-                  require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                  require("../php_libs/SUM_YEAR.php");
-                  ?>
-                </td>
+                <?php require("../php_libs/SUM_MONTH.php"); ?>
+                <td class="align-middle m-0 p-0 <?php require("../php_libs/ALERT_MONTH.php"); ?>"><?= $sum_month; ?></td><!--月間累計-->
+
+                <?php
+                require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                require("../php_libs/SUM_YEAR.php");
+                 ?>
+                <td class="align-middle m-0 p-0 <?php require("../php_libs/ALERT_YEAR.php"); ?>"><?= $sum_year; ?></td><!--年間累計-->
               </tr>
               <?php
             }

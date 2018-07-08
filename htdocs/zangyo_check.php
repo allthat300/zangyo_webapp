@@ -65,6 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
+						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -187,22 +188,27 @@ $pdo = db_connect();
                 </thead>
                 <tbody>
                   <tr>
+                    <!--申請時間-->
                     <td class="m-0 p-0">
                       <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][app_time]" value="<?=htmlspecialchars(substr($row['app_time'],0,-3),ENT_QUOTES)?>">
                     </td>
-                    <!--申請時間-->
 
-
+                    <!--実施時間-->
                     <td class="m-0 p-0">
                       <input type="text" class="form-control" name="zangyo[<?=$row['id']?>][result_time]" value="<?=htmlspecialchars(substr($row['result_time'],0,-3),ENT_QUOTES)?>">
                     </td>
-                    <!--実施時間-->
-                    <td class="m-0 p-1"><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                    <td class="m-0 p-1"><!--年間累計-->
-                      <?php
-                      require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                      require("../php_libs/SUM_YEAR.php");
-                      ?>
+
+                    <!--月間累計-->
+                    <?php require("../php_libs/SUM_MONTH.php"); ?>
+                    <td class="m-0 p-1"><?= $sum_month; ?></td>
+
+                    <!--年間累計-->
+                    <?php
+                    require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                    require("../php_libs/SUM_YEAR.php");
+                    ?>
+                    <td class="m-0 p-1"><?= $sum_year; ?></td>
+
                     </tr>
                   </tbody>
                 </table>
@@ -373,13 +379,14 @@ $pdo = db_connect();
                           }
                           ?>
                         </td>
-                        <td><?php require("../php_libs/SUM_MONTH.php"); ?></td><!--月間累計-->
-                        <td><!--年間累計-->
-                          <?php
-                          require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
-                          require("../php_libs/SUM_YEAR.php");
-                          ?>
-                        </td>
+                        <?php require("../php_libs/SUM_MONTH.php"); ?>
+                        <td class="<?php require("../php_libs/ALERT_MONTH.php"); ?>"><?= $sum_month; ?></td><!--月間累計-->
+
+                        <?php
+                        require_once("../php_libs/FUNC_CHANGE_TO_APR1.php");
+                        require("../php_libs/SUM_YEAR.php");
+                         ?>
+                        <td class="<?php require("../php_libs/ALERT_YEAR.php"); ?>"><?= $sum_year; ?></td><!--年間累計-->
                         <td>
                           <?php
                           if(htmlspecialchars($row['boss_check'],ENT_QUOTES) == "1")
