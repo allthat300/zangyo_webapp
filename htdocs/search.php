@@ -65,7 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
-						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
+						<a class="dropdown-item" href="report-each-person-month.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -94,11 +94,11 @@ $pdo = db_connect();
               <div id="datepicker-default">
                 <div class="form-inline">
                   <div class="input-group date w-100">
-                    <input type="text" class="form-control" name="search_start_date" autocomplete="off" value="<?php
-										if(!empty($_POST['search_start_date'])){
-											echo $_POST['search_start_date'];
-										}else{
+                    <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off" value="<?php
+										if(!isset($_POST['search_start_date'])){
 											echo date('Y-m-d', strtotime('-1 day'));
+										}else{
+											echo $_POST['search_start_date'];
 										}
 										?>">
                     <div class="input-group-addon">
@@ -112,11 +112,9 @@ $pdo = db_connect();
               <div id="datepicker-default">
                 <div class="form-inline">
                   <div class="input-group date w-100">
-                    <input type="text" class="form-control" name="search_end_date" autocomplete="off" value="<?php
+                    <input type="text" class="form-control" placeholder="ex)2019-03-31" name="search_end_date" autocomplete="off" value="<?php
 										 if(!empty($_POST['search_end_date'])){
 											 echo $_POST['search_end_date'];
-										 }else{
-											 echo date('Y-m-d', strtotime('+1 day'));
 										 }
 										 ?>">
                     <div class="input-group-addon">
@@ -237,37 +235,33 @@ $pdo = db_connect();
 
 
   <?php
-  if(!empty($_POST['search_start_date'])){
-    $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
-  }else{
-    $sql_search_start_date = " AND zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'";
-  }
 
+  if(!isset($_POST['search_start_date'])){ //変数が未定義またはNULLのとき
+    $sql_search_start_date = " AND zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'";
+  }else{
+    $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
+  }
   if(!empty($_POST['search_end_date'])){
     $sql_search_end_date = " AND zangyo_date <= '" . $_POST['search_end_date'] ." 23:59:59'";
   }else{
-    $sql_search_end_date = " AND zangyo_date <= '" . date('Y-m-d', strtotime('+1 day')) ." 23:59:59'";
+    $sql_search_end_date = "";
   }
-
   if(!empty($_POST['search_employee_id'])){
     $sql_search_employee_id = " AND employee.employee_id = " . $_POST['search_employee_id'];
   }else{
     $sql_search_employee_id = "";
   }
-
   if(!empty($_POST['search_department_id'])){
     $sql_search_department_id = " AND department.department_id = " . $_POST['search_department_id'];
   }else{
     $sql_search_department_id = "";
   }
-
   if(!empty($_POST['search_group_id'])){
     $sql_search_group_id = " AND work_group.group_id = " . $_POST['search_group_id'];
   }else{
     $sql_search_group_id = "";
   }
   $sql_where = " WHERE 1 ". $sql_search_start_date . $sql_search_end_date . $sql_search_employee_id . $sql_search_department_id . $sql_search_group_id;
-
   try{
     $sql="SELECT zangyo.id,zangyo.zangyo_date,zangyo.app_time,zangyo.employee_id,employee.employee_name,case_id.category,zangyo.project,zangyo.project_detail,zangyo.boss_check,zangyo.remarks,zangyo.result_time,employee.department_id,department.department_name,employee.group_id,work_group.group_name
     from ((((zangyo LEFT OUTER JOIN employee ON zangyo.employee_id = employee.employee_id)
@@ -283,7 +277,6 @@ $pdo = db_connect();
   }catch(PDOException $Exception){
     print"エラー：".$Exception->getMessage();
   }
-
   ?>
   <div class="border-top border-bottom my-2 py-2">
     <form method="get" action="zangyo_check.php">
@@ -315,13 +308,11 @@ $pdo = db_connect();
 
           <tr>
             <?php
-
             if($count>0){
               while($row=$stmh->fetch(PDO::FETCH_ASSOC)){
                 ?>
                 <td><input type="checkbox" name="id[]" value="<?=htmlspecialchars($row['id'],ENT_QUOTES)?>"></td>
                 <td><!--実施日--><?php
-
                 $datetime = new DateTime($row['zangyo_date']);
                 $week = array("日", "月", "火", "水", "木", "金", "土");
                 $w = (int)$datetime->format('w');
@@ -410,7 +401,6 @@ $pdo = db_connect();
           todayBtn: 'linked',
           defaultDate: 0
         });
-
       });
       </script>
 

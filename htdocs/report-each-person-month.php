@@ -490,7 +490,7 @@ var complexChartOption = {
 				fontSize: 18               //フォントサイズ
 			},
 			ticks: {
-				fontSize: 18             //フォントサイズ
+				// fontSize: 18             //フォントサイズ
 			},
 		}],
 	}

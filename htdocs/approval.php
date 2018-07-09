@@ -65,7 +65,7 @@ $pdo = db_connect();
             <a class="dropdown-item" href="report-year.php">年間(部署)</a>
             <a class="dropdown-item" href="report-personal-month.php">月間(個人)</a>
 						<a class="dropdown-item" href="report-personal-year.php">年間(個人)</a>
-						<a class="dropdown-item" href="report-each-person-year.php">個人別</a>
+						<a class="dropdown-item" href="report-each-person-month.php">個人別</a>
           </div>
         </li>
       </ul>
@@ -97,11 +97,11 @@ $pdo = db_connect();
                   <div class="form-inline">
                     <div class="input-group date w-100">
                       <input type="text" class="form-control" placeholder="ex)2018-04-01" name="search_start_date" autocomplete="off" value="<?php
-											 if(!empty($_POST['search_start_date'])){
-												 echo $_POST['search_start_date'];
-											 }else{
-												 echo date('Y-m-d', strtotime('-1 day'));
-											 }
+											if(!isset($_POST['search_start_date'])){
+												echo date('Y-m-d', strtotime('-1 day'));
+											}else{
+												echo $_POST['search_start_date'];
+											}
 											 ?>">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
@@ -114,11 +114,9 @@ $pdo = db_connect();
                 <div id="datepicker-default">
                   <div class="form-inline">
                     <div class="input-group date w-100">
-                      <input type="text" class="form-control" placeholder="ex)2018-06-30" name="search_end_date" autocomplete="off" value="<?php
+                      <input type="text" class="form-control" placeholder="ex)2019-03-31" name="search_end_date" autocomplete="off" value="<?php
 											 if(!empty($_POST['search_end_date'])){
 												 echo $_POST['search_end_date'];
-											 }else{
-												 echo date('Y-m-d', strtotime('+1 day'));
 											 }
 											 ?>">
                       <div class="input-group-addon">
@@ -240,16 +238,16 @@ $pdo = db_connect();
       </div>
 
       <?php
-      if(!empty($_POST['search_start_date'])){
-      $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
-      }else{
-      $sql_search_start_date = " AND zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'";
-      }
+			if(!isset($_POST['search_start_date'])){
+		    $sql_search_start_date = " AND zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'";
+		  }else{
+		    $sql_search_start_date = " AND zangyo_date >= '" . $_POST['search_start_date'] ." 00:00:00'";
+		  }
 
       if(!empty($_POST['search_end_date'])){
       $sql_search_end_date = " AND zangyo_date <= '" . $_POST['search_end_date'] ." 23:59:59'";
       }else{
-      $sql_search_end_date = " AND zangyo_date <= '" . date('Y-m-d', strtotime('+1 day')) ." 23:59:59'";
+      $sql_search_end_date = "";
       }
 
       if(!empty($_POST['search_employee_id'])){
