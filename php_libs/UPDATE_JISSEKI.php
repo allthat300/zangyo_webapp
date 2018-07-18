@@ -17,7 +17,7 @@ if(!empty($_POST['id'])){
         $stmh = $pdo->prepare($sql);  //prepareメソッドで各テーブル名(date,case_id...)に対しパラメータ(:date,:case_id...)を与える。
 
         $stmh->bindValue(':id',$id,PDO::PARAM_INT);
-        $stmh->bindValue(':result_time',$result_time,PDO::PARAM_STR);
+        $stmh->bindValue(':result_time',mb_convert_kana($result_time,'a'),PDO::PARAM_STR);
         $stmh->execute(); //プリペアドステートメントの実行
         $pdo->commit(); //トランザクションをコミット
         //print substr($id,1)."のデータを登録しました。<br>";  //rowcount:SQL文を実行して検索結果や更新・削除された行数を返すメソッド
