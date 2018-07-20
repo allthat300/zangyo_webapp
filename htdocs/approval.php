@@ -130,8 +130,24 @@ $pdo = db_connect();
                 <select class="form-control" name="search_employee_id">
                   <option value="" <?php if(empty($_POST['search_employee_id'])){echo "selected";} ?>>(指定なし)</option>
                   <?php
+
+									if(!empty($_POST['seartch_department_id'])){
+										$sql_department = " AND employee.department_id = '" . $_POST['seartch_department_id'] ."' ";
+									}else{
+										$sql_department = "";
+									}
+
+									if(!empty($_POST['search_group_id'])){
+										$sql_group = " AND employee.group_id = '" . $_POST['search_group_id'] ."' ";
+									}else{
+										$sql_group = "";
+									}
+
                   try{
-                    $sql="SELECT * from employee";
+										$sql="SELECT * from employee
+										WHERE 1"
+										.$sql_department
+										.$sql_group;
                     $stmh=$pdo->prepare($sql);
                     $stmh->execute();
                     $count=$stmh->rowCount();

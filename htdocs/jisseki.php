@@ -83,8 +83,8 @@ $pdo = db_connect();
             <th style="width: 200px" class="text-center">開始日</th>
 						<th style="width: 200px" class="text-center">終了日</th>
             <th style="width: 250px" class="text-center">名前</th>
-						<th style="width: 250px" class="text-center">名前を部署で絞り込み</th>
-						<th style="width: 250px" class="text-center">名前をグループで絞り込み</th>
+						<th style="width: 250px" class="text-center">部署で絞り込み</th>
+						<th style="width: 250px" class="text-center">グループで絞り込み</th>
           </tr>
         </thead>
         <tbody>
