@@ -49,8 +49,14 @@ foreach($_POST['zangyo'] as $id1 => $value1)
     $stmh->bindValue(':zangyo_date',$zangyo_date,PDO::PARAM_STR);
     $stmh->bindValue(':case_id',$value1['case_id'],PDO::PARAM_INT);
     $stmh->bindValue(':app_time',mb_convert_kana($value1['app_time'],'a'),PDO::PARAM_STR);
-    $stmh->bindValue(':result_time',mb_convert_kana($value1['result_time'],'a'),PDO::PARAM_STR);
-    $stmh->bindValue(':project',$value1['project'],PDO::PARAM_STR);
+
+		if(is_null($value1['result_time'])){
+			$stmh->bindValue(':result_time',$value1['result_time'],PDO::PARAM_STR);
+		}else{
+    	$stmh->bindValue(':result_time',mb_convert_kana($value1['result_time'],'a'),PDO::PARAM_STR);
+		}
+
+		$stmh->bindValue(':project',$value1['project'],PDO::PARAM_STR);
     $stmh->bindValue(':project_detail',$value1['project_detail'],PDO::PARAM_STR);
     $stmh->bindValue(':boss_check',$value1['boss_check'],PDO::PARAM_INT);
     $stmh->bindValue(':remarks',$value1['remarks'],PDO::PARAM_STR);
