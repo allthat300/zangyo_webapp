@@ -490,8 +490,10 @@ var complexChartOption = {
 				fontSize: 18               //フォントサイズ
 			},
 			ticks: {
+				autoSkip: false,
+				maxTicksLimit: 50,
 				// fontSize: 18             //フォントサイズ
-			},
+			}
 		}],
 	}
 };

@@ -37,7 +37,8 @@ try{
 
 		$stmh->bindValue(':zangyo_date',substr($_POST['zangyo_date'],0,10).$zangyo_adjust,PDO::PARAM_STR); //prepareメソッドの:dateに外部からのdata_formを結びつける。データ型は文字列。
 		$stmh->bindValue(':case_id',$_POST['zangyo_category'],PDO::PARAM_INT);
-		$stmh->bindValue(':employee_id',mb_convert_kana($_POST['employee_id'], 'a'),PDO::PARAM_INT);
+		$stmh->bindValue(':employee_id',sprintf('%06d',mb_convert_kana($_POST['employee_id'], 'a')),PDO::PARAM_INT); //6桁で0埋め
+		// $stmh->bindValue(':employee_id',mb_convert_kana($_POST['employee_id'], 'a'),PDO::PARAM_INT);
 		$stmh->bindValue(':app_time',mb_convert_kana($_POST['zangyo_time'], 'a'),PDO::PARAM_STR);
 		$stmh->bindValue(':project',$_POST['model_name'],PDO::PARAM_STR);
 		$stmh->bindValue(':project_deteil',$_POST['zangyo_detail'],PDO::PARAM_STR);

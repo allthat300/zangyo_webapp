@@ -164,8 +164,7 @@ $pdo = db_connect();
             LEFT OUTER JOIN department ON employee.department_id = department.department_id)
             LEFT OUTER JOIN work_group ON employee.group_id = work_group.group_id)
 						WHERE  zangyo_date >= '" . date('Y-m-d', strtotime('-1 day')) ." 00:00:00'
-            ORDER BY zangyo_date DESC
-            ";
+            ORDER BY zangyo_date DESC , id DESC";
             //                        where id=(select max(id) from zangyo)";
             $stmh=$pdo->prepare($sql);
             $stmh->execute();
