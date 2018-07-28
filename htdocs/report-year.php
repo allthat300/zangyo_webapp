@@ -69,6 +69,23 @@ $pdo = db_connect();
           </div>
         </li>
       </ul>
+			<?php
+			if(!isset($_COOKIE['employee_id'])){
+				?>
+				<form class="form-inline mt-2 mt-md-0" method="post" action="COOKIE.php">
+					<input class="form-control mr-sm-2" type="text" placeholder="社員番号" name="cookie_employee_id">
+					<button class="btn btn-outline-info my-2 my-sm-0" type="submit" name="log" value="login">ログイン</button>
+				</form>
+				<?php
+			}else{
+				?>
+				<form class="form-inline mt-2 mt-md-0" method="post" action="COOKIE.php">
+					<ul class="navbar-nav mr-auto"><li class="nav-item mr-sm-2 text-light"><?= $_COOKIE['employee_name'] . " さん" ?></li></ul>
+					<button class="btn btn-outline-info my-2 my-sm-0" type="submit" name="log" value="logout">ログアウト</button>
+				</form>
+				<?php
+			}
+			?>
     </div>
   </nav>
 

@@ -70,7 +70,7 @@ $pdo = db_connect();
         </li>
       </ul>
 			<?php
-			if(empty($_COOKIE['employee_id'])){
+			if(!isset($_COOKIE['employee_id'])){
 				?>
 				<form class="form-inline mt-2 mt-md-0" method="post" action="COOKIE.php">
 					<input class="form-control mr-sm-2" type="text" placeholder="社員番号" name="cookie_employee_id">
@@ -135,7 +135,15 @@ $pdo = db_connect();
                   </select>
                 </td>
                 <td class="m-0 p-0">
-									<input type="text" class="form-control" placeholder="社員番号" name="employee_id" required>
+									<input type="text" class="form-control" placeholder="社員番号" name="employee_id" value=
+									<?php
+									if(isset($_COOKIE['employee_id'])){
+										echo $_COOKIE['employee_id'];
+									}else {
+										echo("\"\"");
+									}
+									 ?>
+									 required>
 								</td>
                 <td class="m-0 p-0"><input type="text" class="form-control" placeholder="ex)1時間→1:00" name="zangyo_time"></td>
                 <td class="m-0 p-0"><input type="text" class="form-control" placeholder="EX-****" name="model_name"></td>

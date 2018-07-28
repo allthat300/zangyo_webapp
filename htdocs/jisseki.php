@@ -69,6 +69,23 @@ $pdo = db_connect();
 					</div>
 				</li>
 			</ul>
+			<?php
+			if(!isset($_COOKIE['employee_id'])){
+				?>
+				<form class="form-inline mt-2 mt-md-0" method="post" action="COOKIE.php">
+					<input class="form-control mr-sm-2" type="text" placeholder="社員番号" name="cookie_employee_id">
+					<button class="btn btn-outline-info my-2 my-sm-0" type="submit" name="log" value="login">ログイン</button>
+				</form>
+				<?php
+			}else{
+				?>
+				<form class="form-inline mt-2 mt-md-0" method="post" action="COOKIE.php">
+					<ul class="navbar-nav mr-auto"><li class="nav-item mr-sm-2 text-light"><?= $_COOKIE['employee_name'] . " さん" ?></li></ul>
+					<button class="btn btn-outline-info my-2 my-sm-0" type="submit" name="log" value="logout">ログアウト</button>
+				</form>
+				<?php
+			}
+			?>
 		</div>
 	</nav>
 
@@ -130,7 +147,7 @@ $pdo = db_connect();
 							<td class="m-0 p-0">
 								<select class="form-control" name="employee_id">
 									<option value="" <?php if(!isset($_POST['employee_id']) && !isset($_COOKIE['employee_id'])){echo "selected";} ?>>(指定なし)</option>
-									<?php
+									<?php //宣言なし、Cookieなし
 
 									if(!empty($_POST['department_id'])){
 										$sql_department = " AND employee.department_id = '" . $_POST['department_id'] ."' ";
@@ -161,11 +178,11 @@ $pdo = db_connect();
 											?>
 											<option value="<?=htmlspecialchars($row['employee_id'],ENT_QUOTES)?>"
 												<?php
-												if(!isset($_POST['employee_id']) && !empty($_COOKIE['employee_id'])){
+												if(!isset($_POST['employee_id']) && !empty($_COOKIE['employee_id'])){ //宣言なし、Cookieあり
 													if($_COOKIE['employee_id'] == htmlspecialchars($row['employee_id'],ENT_QUOTES)){
 														echo "selected";
 													}
-												}elseif(isset($_POST['employee_id'])){
+												}elseif(isset($_POST['employee_id'])){ //宣言あり
 													if($_POST['employee_id'] == htmlspecialchars($row['employee_id'],ENT_QUOTES)){
 														echo "selected";
 													}
@@ -282,10 +299,10 @@ $pdo = db_connect();
 
 					if(isset($_POST['employee_id'])){
 						if(!empty($_POST['employee_id'])){
-						$sql_employee = " AND zangyo.employee_id = '" . $_POST['employee_id'] . "' "; //宣言あり、値あり
-					}else{
-						$sql_employee = ""; //宣言あり、値なし
-					}
+							$sql_employee = " AND zangyo.employee_id = '" . $_POST['employee_id'] . "' "; //宣言あり、値あり
+						}else{
+							$sql_employee = ""; //宣言あり、値なし
+						}
 					}else{
 						if(!empty($_COOKIE['employee_id'])){
 							$sql_employee = " AND zangyo.employee_id = '" . $_COOKIE['employee_id'] . "' "; //宣言なし、COOKIEあり
